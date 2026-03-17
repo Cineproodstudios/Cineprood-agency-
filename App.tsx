@@ -5,6 +5,8 @@ import Hero from './components/Hero';
 import Origen from './components/Origen';
 import Modos from './components/Modos';
 import Proyectos from './components/Proyectos';
+import Fotos from './components/Fotos';
+import Reveal from './components/Reveal';
 import Manifiesto from './components/Manifiesto';
 import Contacto from './components/Contacto';
 import Footer from './components/Footer';
@@ -41,6 +43,22 @@ const App: React.FC = () => {
         <Origen />
         <Modos />
         <Proyectos onOpenVideo={setSelectedVideo} />
+        
+        {/* Transition Message */}
+        <section className="py-32 md:py-48 bg-white dark:bg-black transition-colors duration-500">
+          <div className="max-w-7xl mx-auto px-8 md:px-24 text-center">
+            <Reveal>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
+                También <span className="italic font-light opacity-40">capturamos</span>
+              </h2>
+              <div className="mt-8 flex justify-center">
+                <div className="w-12 h-[1px] bg-black dark:bg-white opacity-20"></div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        <Fotos />
         <Manifiesto />
         <Contacto />
       </main>
