@@ -74,21 +74,24 @@ const Modos: React.FC = () => {
   const getSnapTranslation = (p: number) => {
     const totalItems = 4;
     const sectionWidth = 1 / totalItems;
+    
+    // Handle the edge case where p is exactly 1 or very close
+    if (p >= 0.99) return (totalItems - 1) * 100;
+
     const currentItem = Math.floor(p / sectionWidth);
     const progressInItem = (p % sectionWidth) / sectionWidth;
     const transitionThreshold = 0.25;
     let itemOffset = 0;
     
-    if (progressInItem < transitionThreshold) {
-        itemOffset = 0;
-    } else if (progressInItem > (1 - transitionThreshold)) {
-        const t = (progressInItem - (1 - transitionThreshold)) / transitionThreshold;
-        itemOffset = t * t * (3 - 2 * t);
-    } else {
-        itemOffset = 0;
+    if (progressInItem > (1 - transitionThreshold)) {
+        // Only transition if we are NOT on the last item
+        if (currentItem < totalItems - 1) {
+            const t = (progressInItem - (1 - transitionThreshold)) / transitionThreshold;
+            itemOffset = t * t * (3 - 2 * t);
+        }
     }
     
-    return (Math.min(currentItem, 3) + itemOffset) * 100;
+    return (currentItem + itemOffset) * 100;
   };
 
   const xTranslation = getSnapTranslation(scrollProgress);
