@@ -103,7 +103,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
             >
               <div className="flex items-center gap-4 overflow-hidden h-6">
                 <span className="text-[9px] font-mono opacity-20 dark:opacity-20 tracking-widest uppercase group-hover/menu:opacity-100 transition-opacity">
-                  ÍNDICE
+                   ÍNDICE
                 </span>
                 <div className="w-8 h-[1px] bg-black/10 dark:bg-white/10 group-hover/menu:w-12 transition-all"></div>
                 <span 
