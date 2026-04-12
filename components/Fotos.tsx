@@ -10,7 +10,8 @@ const images = [
   "https://i.postimg.cc/SsXsFfcg/IMG-5439-copia.jpg",
   "https://i.postimg.cc/R0pFDDJw/IMG-5791-copia.jpg",
   "https://i.postimg.cc/4dKdkQpL/IMG-6544.jpg",
-  "https://i.postimg.cc/nz6LH9kj/vans-normal.jpg"
+  "https://i.postimg.cc/nz6LH9kj/vans-normal.jpg",
+  "https://i.postimg.cc/Y2mpF6Pb/IMG-6359-2.jpg"
 ];
 
 const Fotos: React.FC = () => {
