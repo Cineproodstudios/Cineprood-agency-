@@ -6,11 +6,34 @@ const Contacto: React.FC = () => {
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formState.name && formState.email) {
-      setSubmitted(true);
-      setTimeout(() => setSubmitted(false), 3000);
+      try {
+        const response = await fetch('https://formspree.io/cineprood@gmail.com', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: formState.name,
+            email: formState.email,
+            message: formState.message,
+            _subject: `Nueva propuesta de proyecto de ${formState.name}`
+          })
+        });
+
+        if (response.ok) {
+          setSubmitted(true);
+          setFormState({ name: '', email: '', message: '' });
+          setTimeout(() => setSubmitted(false), 5000);
+        } else {
+          alert('Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('Hubo un error de conexión. Por favor, inténtalo de nuevo.');
+      }
     }
   };
 
