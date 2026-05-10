@@ -25,7 +25,7 @@ const Contacto: React.FC = () => {
             <div className="space-y-12 text-xl font-light">
               <div>
                 <p className="text-xs font-mono uppercase tracking-widest opacity-40 mb-2">E-mail</p>
-                <a href="mailto:hello@cineprood.com" className="text-2xl md:text-3xl hover:opacity-60 transition-colors">hello@cineprood.com</a>
+                <a href="mailto:cineprood@gmail.com" className="text-2xl md:text-3xl hover:opacity-60 transition-colors">cineprood@gmail.com</a>
               </div>
               <div>
                 <p className="text-xs font-mono uppercase tracking-widest opacity-40 mb-2">Ubicación</p>
