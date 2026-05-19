@@ -17,22 +17,10 @@ const proyectos: Proyecto[] = [
     image: "https://i.postimg.cc/yxXVhQmJ/hf-20260203-123826-56d416d4-9f59-43c4-8baa-0514cf967b19.jpg"
   },
   { 
-    id: "3", 
-    title: "Bipolar — Dsantos", 
-    video: "https://player.vimeo.com/video/1165150421",
-    image: "https://i.postimg.cc/B647Lmn7/hf-20260127-112721-bbb00a6f-9c68-4a3e-b237-9642bf6dc785.png"
-  },
-  { 
     id: "4", 
     title: "Ferrari Aspire", 
     video: "https://player.vimeo.com/video/1163585610",
     image: "https://i.postimg.cc/RFWdn2zf/IMG-3842-Recuperado.jpg"
-  },
-  {
-    id: "5",
-    title: "Valhalla | phillips oneblade",
-    video: "https://player.vimeo.com/video/1169509590",
-    image: "https://i.postimg.cc/cLF0xkM4/hf-20260206-141712-aafaaf6a-0721-4e3d-87fb-c6641cc191eb.png"
   },
   {
     id: "6",
@@ -41,10 +29,10 @@ const proyectos: Proyecto[] = [
     image: "https://i.postimg.cc/MHGVssfL/hf-20260406-122659-1c3aed91-fcf1-4147-8427-afb51d25cb6a-(1).jpg"
   },
   {
-    id: "7",
-    title: "Tous | freedom",
-    video: "https://player.vimeo.com/video/1182416321",
-    image: "https://i.postimg.cc/7ZhLrr2N/Timeline-1-01-00-19-23.jpg"
+    id: "8",
+    title: "VISIT CÓRDOBA",
+    video: "https://player.vimeo.com/video/1193698974",
+    image: "https://i.postimg.cc/jqWCVDNf/Timeline-1-01-00-04-13.jpg"
   }
 ];
 
