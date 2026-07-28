@@ -91,8 +91,8 @@ const Fotos: React.FC = () => {
 
         {/* Counter */}
         <div className="absolute top-12 right-12 z-20">
-          <p className="text-[10px] font-mono tracking-[0.4em] uppercase opacity-30">
-            {String(currentIndex + 1).padStart(2, '0')} / {String(images.length).padStart(2, '0')}
+          <p className="text-[10px] font-mono tracking-[0.4em] uppercase opacity-60">
+            <span className="text-red-600 font-bold">{String(currentIndex + 1).padStart(2, '0')}</span> / {String(images.length).padStart(2, '0')}
           </p>
         </div>
 
@@ -161,8 +161,8 @@ const Fotos: React.FC = () => {
         </div>
 
         {/* Scroll Hint */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-20">
-          <div className="w-[1px] h-12 bg-white animate-pulse"></div>
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-60">
+          <div className="w-[1px] h-12 bg-red-600 animate-pulse"></div>
         </div>
       </div>
     </section>

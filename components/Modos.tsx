@@ -137,12 +137,12 @@ const Modos: React.FC = () => {
                   
                   <div className="mt-4 w-full flex flex-col items-center">
                     <p 
-                      className={`text-base md:text-2xl font-light uppercase tracking-[0.2em] transition-all duration-700 ${isActive ? 'opacity-60 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                      className={`text-base md:text-2xl font-light uppercase tracking-[0.2em] transition-all duration-700 ${isActive ? 'opacity-80 translate-y-0 text-red-600 font-semibold' : 'opacity-0 translate-y-4'}`}
                     >
                       {p.desc}
                     </p>
                     <div 
-                      className={`h-[1px] bg-black dark:bg-white transition-all duration-700 ease-in-out mt-8 ${isActive ? 'w-full' : 'w-0'}`}
+                      className={`h-[2px] bg-red-600 transition-all duration-700 ease-in-out mt-8 ${isActive ? 'w-full' : 'w-0'}`}
                     />
                   </div>
                 </div>

@@ -33,6 +33,18 @@ const proyectos: Proyecto[] = [
     title: "VISIT CÓRDOBA",
     video: "https://player.vimeo.com/video/1193698974",
     image: "https://i.postimg.cc/jqWCVDNf/Timeline-1-01-00-04-13.jpg"
+  },
+  {
+    id: "9",
+    title: "Hay Cosas que Nunca Cambian, Mejoran | Renault 5 E-tech",
+    video: "https://player.vimeo.com/video/1209219710",
+    image: "https://i.postimg.cc/pXpSqh33/hf-20260712-105941-dd0833b0-b2e8-4ac9-8c1c-f1c2d115f34f.png"
+  },
+  {
+    id: "10",
+    title: "Jeep avenger | Nacido para dominar cualquier era",
+    video: "https://player.vimeo.com/video/1213647026",
+    image: "https://i.postimg.cc/d02HKRGC/Timeline-1-01-00-43-22.jpg"
   }
 ];
 
@@ -106,7 +118,7 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
               <Reveal delay={200}>
                 <button 
                   onClick={() => setView('shorts')}
-                  className="group flex items-center gap-4 px-6 py-3 border border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white text-[10px] font-mono tracking-[0.4em] uppercase transition-all duration-500 bg-black/5 dark:bg-white/5 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black"
+                  className="group flex items-center gap-4 px-6 py-3 border border-red-600/30 hover:border-red-600 text-[10px] font-mono tracking-[0.4em] uppercase transition-all duration-500 bg-red-600/5 hover:bg-red-600 hover:text-white"
                 >
                   <span>Cortometrajes</span>
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="transition-transform group-hover:translate-x-1">
@@ -124,7 +136,7 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
                   className="group cursor-pointer" 
                   onClick={() => onOpenVideo(p.video)}
                 >
-                  <div className="relative aspect-video bg-black/5 dark:bg-[#080808] border border-black/5 dark:border-white/5 overflow-hidden mb-8 transition-all duration-700 group-hover:border-black/20 dark:group-hover:border-white/20">
+                  <div className="relative aspect-video bg-black/5 dark:bg-[#080808] border border-black/5 dark:border-white/5 overflow-hidden mb-8 transition-all duration-700 group-hover:border-red-600/50">
                     {p.image && (
                       <img 
                         src={p.image} 
@@ -137,7 +149,7 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 dark:from-black/80 to-transparent opacity-60"></div>
                     
                     <div className="absolute inset-0 flex items-center justify-center translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out z-20">
-                      <div className="bg-black dark:bg-white text-white dark:text-black px-8 py-3 text-[10px] font-black uppercase tracking-[0.4em]">
+                      <div className="bg-red-600 text-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.4em] shadow-lg shadow-red-600/20">
                         VER PROYECTO
                       </div>
                     </div>
@@ -147,15 +159,15 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
                     )}
                   </div>
 
-                  <div className="flex flex-col gap-2 border-l border-black/0 dark:border-white/0 group-hover:border-black/20 dark:group-hover:border-white/20 pl-0 group-hover:pl-6 transition-all duration-500">
+                  <div className="flex flex-col gap-2 border-l border-transparent group-hover:border-red-600 pl-0 group-hover:pl-6 transition-all duration-500">
                     <div className="flex justify-between items-start">
-                      <h4 className="text-xl md:text-2xl font-bold tracking-tight uppercase transition-colors">
+                      <h4 className="text-xl md:text-2xl font-bold tracking-tight uppercase group-hover:text-red-600 transition-colors">
                         {p.title}
                       </h4>
                     </div>
                     
-                    <div className="h-[1px] bg-black/10 dark:bg-white/10 w-full relative mt-2 overflow-hidden">
-                      <div className="absolute inset-0 bg-black dark:bg-white -translate-x-full group-hover:translate-x-0 transition-transform duration-700 ease-in-out"></div>
+                    <div className="h-[2px] bg-black/10 dark:bg-white/10 w-full relative mt-2 overflow-hidden">
+                      <div className="absolute inset-0 bg-red-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-700 ease-in-out"></div>
                     </div>
                   </div>
                 </Reveal>
@@ -187,7 +199,7 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
               <Reveal delay={200}>
                 <button 
                   onClick={() => setView('portfolio')}
-                  className="group flex items-center gap-4 px-6 py-3 border border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white text-[10px] font-mono tracking-[0.4em] uppercase transition-all duration-500 bg-black/5 dark:bg-white/5 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black"
+                  className="group flex items-center gap-4 px-6 py-3 border border-red-600/30 hover:border-red-600 text-[10px] font-mono tracking-[0.4em] uppercase transition-all duration-500 bg-red-600/5 hover:bg-red-600 hover:text-white"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="rotate-180 transition-transform group-hover:-translate-x-1">
                     <path d="M1 6H11M11 6L6 1M11 6L6 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>

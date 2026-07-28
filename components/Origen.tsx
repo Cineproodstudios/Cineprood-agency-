@@ -116,10 +116,10 @@ const Origen: React.FC = () => {
         {/* Skip Button */}
         <a 
           href="#proyectos" 
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 text-[10px] font-mono uppercase tracking-[0.4em] opacity-30 hover:opacity-100 transition-all duration-500 flex flex-col items-center gap-3 group"
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 text-[10px] font-mono uppercase tracking-[0.4em] opacity-40 hover:opacity-100 hover:text-red-600 transition-all duration-500 flex flex-col items-center gap-3 group"
         >
           <span className="group-hover:translate-y-[-2px] transition-transform duration-500">Saltar historia</span>
-          <div className="w-[1px] h-8 bg-white/20 group-hover:h-12 transition-all duration-500"></div>
+          <div className="w-[1px] h-8 bg-red-600 group-hover:h-12 transition-all duration-500"></div>
         </a>
 
         <div className="relative w-full max-w-5xl px-6 md:px-12 h-full flex items-center justify-center">

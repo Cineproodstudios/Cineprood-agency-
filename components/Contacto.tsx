@@ -48,7 +48,7 @@ const Contacto: React.FC = () => {
             <div className="space-y-12 text-xl font-light">
               <div>
                 <p className="text-xs font-mono uppercase tracking-widest opacity-40 mb-2">E-mail</p>
-                <a href="mailto:cineprood@gmail.com" className="text-2xl md:text-3xl hover:opacity-60 transition-colors">cineprood@gmail.com</a>
+                <a href="mailto:cineprood@gmail.com" className="text-2xl md:text-3xl hover:text-red-600 transition-colors">cineprood@gmail.com</a>
               </div>
               <div>
                 <p className="text-xs font-mono uppercase tracking-widest opacity-40 mb-2">Ubicación</p>
@@ -62,41 +62,41 @@ const Contacto: React.FC = () => {
           <Reveal delay={200}>
             <form onSubmit={handleSubmit} className="space-y-12">
               <div className="group">
-                <label className="block text-xs uppercase tracking-[0.3em] opacity-40 mb-4 group-focus-within:opacity-100 transition-opacity">Nombre</label>
+                <label className="block text-xs uppercase tracking-[0.3em] opacity-40 mb-4 group-focus-within:opacity-100 group-focus-within:text-red-600 transition-all">Nombre</label>
                 <input 
                   type="text" 
                   required
                   placeholder="Tu nombre"
-                  className="w-full bg-transparent border-b border-black/20 dark:border-white/20 pb-4 focus:outline-none focus:border-black dark:focus:border-white transition-all text-xl"
+                  className="w-full bg-transparent border-b border-black/20 dark:border-white/20 pb-4 focus:outline-none focus:border-red-600 transition-all text-xl"
                   value={formState.name}
                   onChange={(e) => setFormState({...formState, name: e.target.value})}
                 />
               </div>
               <div className="group">
-                <label className="block text-xs uppercase tracking-[0.3em] opacity-40 mb-4 group-focus-within:opacity-100 transition-opacity">Email</label>
+                <label className="block text-xs uppercase tracking-[0.3em] opacity-40 mb-4 group-focus-within:opacity-100 group-focus-within:text-red-600 transition-all">Email</label>
                 <input 
                   type="email" 
                   required
                   placeholder="email@ejemplo.com"
-                  className="w-full bg-transparent border-b border-black/20 dark:border-white/20 pb-4 focus:outline-none focus:border-black dark:focus:border-white transition-all text-xl"
+                  className="w-full bg-transparent border-b border-black/20 dark:border-white/20 pb-4 focus:outline-none focus:border-red-600 transition-all text-xl"
                   value={formState.email}
                   onChange={(e) => setFormState({...formState, email: e.target.value})}
                 />
               </div>
               <div className="group">
-                <label className="block text-xs uppercase tracking-[0.3em] opacity-40 mb-4 group-focus-within:opacity-100 transition-opacity">Mensaje</label>
+                <label className="block text-xs uppercase tracking-[0.3em] opacity-40 mb-4 group-focus-within:opacity-100 group-focus-within:text-red-600 transition-all">Mensaje</label>
                 <textarea 
                   rows={4}
                   required
                   placeholder="Cuéntanos tu proyecto"
-                  className="w-full bg-transparent border-b border-black/20 dark:border-white/20 pb-4 focus:outline-none focus:border-black dark:focus:border-white transition-all text-xl resize-none"
+                  className="w-full bg-transparent border-b border-black/20 dark:border-white/20 pb-4 focus:outline-none focus:border-red-600 transition-all text-xl resize-none"
                   value={formState.message}
                   onChange={(e) => setFormState({...formState, message: e.target.value})}
                 />
               </div>
               <button 
                 type="submit" 
-                className="w-full py-6 bg-black dark:bg-white text-white dark:text-black font-black uppercase tracking-[0.4em] hover:opacity-80 transition-all duration-500 disabled:opacity-50"
+                className="w-full py-6 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.4em] shadow-lg shadow-red-600/20 hover:shadow-red-600/40 transition-all duration-500 disabled:opacity-50"
                 disabled={submitted}
               >
                 {submitted ? 'ENVIADO CORRECTAMENTE' : 'ENVIAR MENSAJE'}

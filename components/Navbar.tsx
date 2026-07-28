@@ -6,6 +6,8 @@ const sections = [
   { id: 'origen', name: 'ORIGEN' },
   { id: 'modos', name: 'MODOS' },
   { id: 'proyectos', name: 'PROYECTOS' },
+  { id: 'tiktok', name: 'TIKTOK' },
+  { id: 'instagram', name: 'INSTAGRAM' },
   { id: 'fotos', name: 'FOTOS' },
   { id: 'manifiesto', name: 'MANIFIESTO' },
   { id: 'contacto', name: 'CONTACTO' }
@@ -75,9 +77,10 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
           <div className="pointer-events-auto flex items-center gap-8">
             <a 
               href="#hero" 
-              className="font-black text-[11px] tracking-[0.4em] uppercase opacity-100 hover:opacity-60 transition-opacity"
+              className="font-black text-[11px] tracking-[0.4em] uppercase opacity-100 hover:text-red-600 transition-colors flex items-center gap-2"
             >
-              CINEPROOD
+              <span>CINEPROOD</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
             </a>
           </div>
           
@@ -89,9 +92,9 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
               aria-label="Alternar tema"
             >
               <div className={`w-8 h-4 rounded-full border border-black/20 dark:border-white/20 relative transition-colors ${isDarkMode ? 'bg-white/10' : 'bg-black/10'}`}>
-                <div className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-black dark:bg-white transition-all duration-500 ${isDarkMode ? 'left-5' : 'left-1'}`}></div>
+                <div className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-red-600 transition-all duration-500 ${isDarkMode ? 'left-5' : 'left-1'}`}></div>
               </div>
-              <span className="text-[9px] font-mono tracking-widest opacity-40 group-hover:opacity-100 transition-opacity uppercase">
+              <span className="text-[9px] font-mono tracking-widest opacity-40 group-hover:opacity-100 group-hover:text-red-600 transition-all uppercase">
                 {isDarkMode ? 'Light' : 'Dark'}
               </span>
             </button>
@@ -102,13 +105,13 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
               onMouseEnter={() => setIsMenuOpen(true)}
             >
               <div className="flex items-center gap-4 overflow-hidden h-6">
-                <span className="text-[9px] font-mono opacity-20 dark:opacity-20 tracking-widest uppercase group-hover/menu:opacity-100 transition-opacity">
+                <span className="text-[9px] font-mono opacity-40 dark:opacity-40 tracking-widest uppercase group-hover/menu:text-red-600 group-hover/menu:opacity-100 transition-all">
                    ÍNDICE
                 </span>
-                <div className="w-8 h-[1px] bg-black/10 dark:bg-white/10 group-hover/menu:w-12 transition-all"></div>
+                <div className="w-8 h-[1px] bg-black/10 dark:bg-white/10 group-hover/menu:w-12 group-hover/menu:bg-red-600 transition-all"></div>
                 <span 
                   key={activeSectionId}
-                  className="text-[10px] font-black tracking-[0.5em] uppercase opacity-50 dark:opacity-50 animate-slide-up group-hover/menu:opacity-100 transition-opacity"
+                  className="text-[10px] font-black tracking-[0.5em] uppercase opacity-70 dark:opacity-70 animate-slide-up group-hover/menu:text-red-600 transition-colors"
                 >
                   {currentSection?.name}
                 </span>
@@ -142,13 +145,13 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
                   hoveredSection && hoveredSection !== s.id ? 'opacity-20 blur-[2px]' : 'opacity-100'
                 }`}
               >
-                <span className="text-[10px] font-mono opacity-30 group-hover:opacity-100 transition-opacity">
+                <span className="text-[10px] font-mono text-red-600 opacity-60 group-hover:opacity-100 group-hover:scale-125 transition-all">
                   0{i + 1}
                 </span>
-                <h2 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase transition-all duration-500 group-hover:italic group-hover:translate-x-4">
+                <h2 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase transition-all duration-500 group-hover:text-red-600 group-hover:translate-x-4">
                   {s.name}
                 </h2>
-                <div className="absolute -bottom-2 left-12 right-0 h-[1px] bg-black/10 dark:bg-white/10 scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left"></div>
+                <div className="absolute -bottom-2 left-12 right-0 h-[2px] bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left"></div>
               </a>
             ))}
           </div>

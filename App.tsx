@@ -5,6 +5,8 @@ import Hero from './components/Hero';
 import Origen from './components/Origen';
 import Modos from './components/Modos';
 import Proyectos from './components/Proyectos';
+import TikTokProfile from './components/TikTokProfile';
+import InstagramProfile from './components/InstagramProfile';
 import Fotos from './components/Fotos';
 import Reveal from './components/Reveal';
 import Manifiesto from './components/Manifiesto';
@@ -35,7 +37,7 @@ const App: React.FC = () => {
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   return (
-    <div className="bg-white dark:bg-black text-black dark:text-white selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black min-h-screen transition-colors duration-500">
+    <div className="bg-white dark:bg-black text-black dark:text-white selection:bg-red-600 selection:text-white min-h-screen transition-colors duration-500">
       <Navbar onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />
       
       <main>
@@ -43,6 +45,8 @@ const App: React.FC = () => {
         <Origen />
         <Modos />
         <Proyectos onOpenVideo={setSelectedVideo} />
+        <TikTokProfile />
+        <InstagramProfile />
         
         {/* Transition Message */}
         <section className="py-32 md:py-48 bg-white dark:bg-black transition-colors duration-500">

@@ -35,10 +35,13 @@ const Hero: React.FC = () => {
           
           <div className={`flex flex-col items-center transition-all duration-1000 delay-500 ease-out ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="mt-8 flex flex-col items-center gap-6">
-              <p className="text-[10px] md:text-xs font-mono tracking-[0.6em] uppercase opacity-30">
-                TRADICIONAL / IA / HÍBRIDO
-              </p>
-              <p className="text-sm md:text-base max-w-sm opacity-40 font-light leading-relaxed">
+              <div className="inline-flex items-center gap-3 px-4 py-1.5 border border-red-600/30 bg-red-600/5 rounded-full">
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                <p className="text-[10px] md:text-xs font-mono tracking-[0.4em] uppercase text-black dark:text-white font-semibold">
+                  TRADICIONAL <span className="text-red-600">/</span> IA <span className="text-red-600">/</span> HÍBRIDO
+                </p>
+              </div>
+              <p className="text-sm md:text-base max-w-sm opacity-60 font-light leading-relaxed">
                 Producción cinematográfica para artistas emergentes y marcas con ambición.
               </p>
             </div>
@@ -46,15 +49,14 @@ const Hero: React.FC = () => {
             <div className="mt-12 flex gap-8">
               <a 
                 href="#proyectos" 
-                className="group relative overflow-hidden px-8 py-4 text-[10px] font-black uppercase tracking-[0.5em] border border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white transition-all"
+                className="group relative overflow-hidden px-8 py-4 text-[10px] font-black uppercase tracking-[0.5em] border border-red-600/40 hover:border-red-600 transition-all"
               >
-                <span className="relative z-10">[ VER PROYECTOS ]</span>
-                <div className="absolute inset-0 bg-black dark:bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
-                <span className="absolute inset-0 z-20 flex items-center justify-center text-white dark:text-black opacity-0 group-hover:opacity-100 transition-opacity duration-500">[ VER PROYECTOS ]</span>
+                <span className="relative z-10 font-bold group-hover:text-white transition-colors">[ VER PROYECTOS ]</span>
+                <div className="absolute inset-0 bg-red-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
               </a>
               <a 
                 href="#contacto" 
-                className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.5em] opacity-40 hover:opacity-100 transition-opacity flex items-center"
+                className="px-8 py-4 text-[10px] font-black uppercase tracking-[0.5em] opacity-60 hover:opacity-100 hover:text-red-600 transition-all flex items-center"
               >
                 CONTACTO
               </a>

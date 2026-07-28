@@ -30,7 +30,7 @@ const VideoModal: React.FC<VideoModalProps> = ({ videoUrl, onClose }) => {
       >
         <button 
           onClick={onClose}
-          className="absolute -top-12 right-0 text-white hover:text-[#c0ff00] transition-colors flex items-center gap-2 group"
+          className="absolute -top-12 right-0 text-white hover:text-red-600 transition-colors flex items-center gap-2 group"
         >
           <span className="text-[10px] font-mono tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">Cerrar</span>
           <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
