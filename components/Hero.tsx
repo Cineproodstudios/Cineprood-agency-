@@ -42,7 +42,7 @@ const Hero: React.FC = () => {
                 </p>
               </div>
               <p className="text-sm md:text-base max-w-sm opacity-60 font-light leading-relaxed">
-                Producción cinematográfica para artistas emergentes y marcas con ambición.
+                Productora híbrida a tu alcance.
               </p>
             </div>
 

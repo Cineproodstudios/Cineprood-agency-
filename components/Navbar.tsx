@@ -76,11 +76,25 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
           <div className="pointer-events-auto flex items-center gap-8">
             <a 
               href="#hero" 
-              className="font-black text-[11px] tracking-[0.4em] uppercase opacity-100 hover:text-red-600 transition-colors flex items-center gap-2"
+              className="font-black text-[11px] tracking-[0.4em] uppercase opacity-100 hover:text-red-600 transition-colors"
             >
               <span>CINEPROOD</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
             </a>
+          </div>
+
+          {/* Centered Active Section / Menu Indicator */}
+          <div 
+            className="absolute left-1/2 -translate-x-1/2 pointer-events-auto cursor-pointer group/menu flex items-center justify-center py-2 px-4"
+            onMouseEnter={() => setIsMenuOpen(true)}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Abrir menú de navegación"
+          >
+            <span 
+              key={activeSectionId}
+              className="text-[10px] md:text-[11px] font-black tracking-[0.5em] uppercase opacity-80 dark:opacity-80 animate-slide-up group-hover/menu:text-red-600 group-hover/menu:opacity-100 transition-colors text-center"
+            >
+              {currentSection?.name}
+            </span>
           </div>
           
           <div className="flex items-center gap-12 pointer-events-auto">
@@ -97,25 +111,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
                 {isDarkMode ? 'Light' : 'Dark'}
               </span>
             </button>
-
-            {/* Visual Guide / Menu Trigger */}
-            <div 
-              className="flex flex-col items-end text-right cursor-pointer group/menu"
-              onMouseEnter={() => setIsMenuOpen(true)}
-            >
-              <div className="flex items-center gap-4 overflow-hidden h-6">
-                <span className="text-[9px] font-mono opacity-40 dark:opacity-40 tracking-widest uppercase group-hover/menu:text-red-600 group-hover/menu:opacity-100 transition-all">
-                   ÍNDICE
-                </span>
-                <div className="w-8 h-[1px] bg-black/10 dark:bg-white/10 group-hover/menu:w-12 group-hover/menu:bg-red-600 transition-all"></div>
-                <span 
-                  key={activeSectionId}
-                  className="text-[10px] font-black tracking-[0.5em] uppercase opacity-70 dark:opacity-70 animate-slide-up group-hover/menu:text-red-600 transition-colors"
-                >
-                  {currentSection?.name}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </nav>
