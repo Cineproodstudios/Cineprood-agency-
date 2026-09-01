@@ -5,9 +5,8 @@ import Hero from './components/Hero';
 import Origen from './components/Origen';
 import Modos from './components/Modos';
 import Proyectos from './components/Proyectos';
-import TikTokProfile from './components/TikTokProfile';
-import InstagramProfile from './components/InstagramProfile';
 import Fotos from './components/Fotos';
+import RedesSociales from './components/RedesSociales';
 import Reveal from './components/Reveal';
 import Manifiesto from './components/Manifiesto';
 import Contacto from './components/Contacto';
@@ -45,8 +44,6 @@ const App: React.FC = () => {
         <Origen />
         <Modos />
         <Proyectos onOpenVideo={setSelectedVideo} />
-        <TikTokProfile />
-        <InstagramProfile />
         
         {/* Transition Message */}
         <section className="py-32 md:py-48 bg-white dark:bg-black transition-colors duration-500">
@@ -63,6 +60,7 @@ const App: React.FC = () => {
         </section>
 
         <Fotos />
+        <RedesSociales />
         <Manifiesto />
         <Contacto />
       </main>

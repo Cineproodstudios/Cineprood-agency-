@@ -6,9 +6,8 @@ const sections = [
   { id: 'origen', name: 'ORIGEN' },
   { id: 'modos', name: 'MODOS' },
   { id: 'proyectos', name: 'PROYECTOS' },
-  { id: 'tiktok', name: 'TIKTOK' },
-  { id: 'instagram', name: 'INSTAGRAM' },
   { id: 'fotos', name: 'FOTOS' },
+  { id: 'redes', name: 'REDES' },
   { id: 'manifiesto', name: 'MANIFIESTO' },
   { id: 'contacto', name: 'CONTACTO' }
 ];

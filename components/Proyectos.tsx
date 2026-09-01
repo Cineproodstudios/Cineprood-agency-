@@ -45,6 +45,12 @@ const proyectos: Proyecto[] = [
     title: "Jeep avenger | Nacido para dominar cualquier era",
     video: "https://player.vimeo.com/video/1213647026",
     image: "https://i.postimg.cc/d02HKRGC/Timeline-1-01-00-43-22.jpg"
+  },
+  {
+    id: "11",
+    title: "Cantabria | Travel video",
+    video: "https://player.vimeo.com/video/1222737449",
+    image: "https://i.vimeocdn.com/video/2195772112-4befaf2a9d5567cf2874b9e192e5138f5418b94d4cbda7e4523f1e3e4ae6deba-d_1280"
   }
 ];
 
