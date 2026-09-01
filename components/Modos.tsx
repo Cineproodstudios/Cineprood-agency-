@@ -51,18 +51,18 @@ const Modos: React.FC = () => {
 
   if (isReducedMotion) {
     return (
-      <section id="modos" className="py-32 px-8 md:px-24 bg-white dark:bg-black transition-colors duration-500">
-        <div className="max-w-7xl mx-auto space-y-48">
-          <h2 className="text-4xl md:text-6xl font-black uppercase mb-24">MODOS DE PRODUCCIÓN</h2>
+      <section id="modos" className="py-28 px-8 md:px-24 bg-white dark:bg-black transition-colors duration-500">
+        <div className="max-w-7xl mx-auto space-y-36">
+          <h2 className="text-3xl md:text-5xl font-black uppercase mb-16">MODOS DE PRODUCCIÓN</h2>
           {panels.map((p, i) => (
-            <div key={i} className="relative py-20">
-              <span className="text-[20vw] font-black absolute -top-10 -left-10 opacity-[0.04] dark:opacity-[0.04] select-none">{p.num}</span>
-              <h3 className="text-5xl md:text-8xl font-black relative z-10">{p.title}</h3>
-              <p className="text-xl opacity-50 mt-4">{p.desc}</p>
+            <div key={i} className="relative py-16">
+              <span className="text-[14vw] font-black absolute -top-8 -left-8 opacity-[0.04] dark:opacity-[0.04] select-none">{p.num}</span>
+              <h3 className="text-4xl md:text-6xl font-black relative z-10">{p.title}</h3>
+              <p className="text-base md:text-lg opacity-50 mt-3">{p.desc}</p>
             </div>
           ))}
-          <div className="pt-32 text-center">
-            <h3 className="text-2xl md:text-4xl font-black uppercase opacity-80 leading-tight">
+          <div className="pt-24 text-center">
+            <h3 className="text-xl md:text-3xl font-black uppercase opacity-80 leading-tight">
               ESCOGE EL MÁS ADECUADO<br/>PARA TU PRESUPUESTO.
             </h3>
           </div>
@@ -119,30 +119,30 @@ const Modos: React.FC = () => {
                 className="min-w-[100vw] h-screen flex flex-col items-center justify-center relative px-8 overflow-hidden"
               >
                 <div 
-                  className="absolute text-[55vw] font-black text-black dark:text-white opacity-[0.03] select-none pointer-events-none transition-transform duration-1000 ease-out"
+                  className="absolute text-[30vw] md:text-[22vw] font-black text-black dark:text-white opacity-[0.03] select-none pointer-events-none transition-transform duration-1000 ease-out"
                   style={{ 
                     transform: `translateX(${(scrollProgress - (sectorStart + 0.125)) * 200}px)`,
-                    left: '5%'
+                    left: '10%'
                   }}
                 >
                   {p.num}
                 </div>
 
-                <div className="relative z-10 text-center flex flex-col items-center max-w-5xl">
+                <div className="relative z-10 text-center flex flex-col items-center max-w-4xl">
                   <h3 
-                    className={`text-6xl md:text-[10vw] font-black tracking-tighter uppercase transition-all duration-700 ease-out ${isActive ? 'scale-[1.03] opacity-100' : 'scale-100 opacity-20'}`}
+                    className={`text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase transition-all duration-700 ease-out ${isActive ? 'scale-[1.02] opacity-100' : 'scale-100 opacity-20'}`}
                   >
                     {p.title}
                   </h3>
                   
                   <div className="mt-4 w-full flex flex-col items-center">
                     <p 
-                      className={`text-base md:text-2xl font-light uppercase tracking-[0.2em] transition-all duration-700 ${isActive ? 'opacity-80 translate-y-0 text-red-600 font-semibold' : 'opacity-0 translate-y-4'}`}
+                      className={`text-sm md:text-lg lg:text-xl font-light uppercase tracking-[0.2em] transition-all duration-700 ${isActive ? 'opacity-80 translate-y-0 text-red-600 font-semibold' : 'opacity-0 translate-y-4'}`}
                     >
                       {p.desc}
                     </p>
                     <div 
-                      className={`h-[2px] bg-red-600 transition-all duration-700 ease-in-out mt-8 ${isActive ? 'w-full' : 'w-0'}`}
+                      className={`h-[2px] bg-red-600 transition-all duration-700 ease-in-out mt-6 ${isActive ? 'w-full' : 'w-0'}`}
                     />
                   </div>
                 </div>
@@ -158,7 +158,7 @@ const Modos: React.FC = () => {
                 transform: `scale(${0.92 + (finalPhaseProgress * 0.08)})`
               }}
             >
-              <h3 className="text-3xl md:text-6xl font-black uppercase max-w-5xl leading-tight tracking-tighter">
+              <h3 className="text-2xl sm:text-3xl md:text-5xl font-black uppercase max-w-4xl leading-tight tracking-tighter">
                 ESCOGE EL MÁS ADECUADO<br/>PARA TU PRESUPUESTO.
               </h3>
             </div>

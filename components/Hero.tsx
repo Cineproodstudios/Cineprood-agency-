@@ -29,7 +29,7 @@ const Hero: React.FC = () => {
         
         {/* Stage: CINEPROOD */}
         <div className={`transition-all duration-[1.5s] ease-out flex flex-col items-center opacity-100 scale-100`}>
-          <h1 className={`text-[18vw] md:text-[14vw] font-black leading-none tracking-[-0.08em] uppercase select-none transition-all duration-[2s] ${stage === 'full' ? 'tracking-normal' : 'tracking-[0.02em]'}`}>
+          <h1 className={`text-[11vw] md:text-[8vw] lg:text-[7vw] font-black leading-none tracking-[-0.05em] uppercase select-none transition-all duration-[2s] ${stage === 'full' ? 'tracking-normal' : 'tracking-[0.02em]'}`}>
             CINEPROOD
           </h1>
           
