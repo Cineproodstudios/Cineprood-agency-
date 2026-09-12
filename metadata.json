@@ -1,5 +1,6 @@
 {
   "name": "CINEPROOD Agency",
-  "description": "A minimalist brutalist cinematic web experience for CINEPROOD audiovisual agency, featuring scroll-activated animations and video portfolio.",
-  "requestFramePermissions": []
+  "description": "A minimalist brutalist cinematic web experience for CINEPROOD audiovisual agency, featuring scroll-activated animations, video portfolio, and an AI Creative Producer assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

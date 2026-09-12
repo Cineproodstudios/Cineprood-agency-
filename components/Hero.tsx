@@ -55,16 +55,16 @@ const Hero: React.FC = () => {
                 </span>
               </a>
 
-              {/* Liquid Glass: Contacto */}
+              {/* Liquid Glass: Xenia */}
               <a 
-                href="#contacto" 
+                href="#xenia" 
                 className="group relative overflow-hidden px-9 py-4 rounded-full text-[10px] font-black uppercase tracking-[0.45em] backdrop-blur-xl bg-gradient-to-b from-white/40 via-white/10 to-white/20 dark:from-white/[0.14] dark:via-white/[0.03] dark:to-white/[0.08] border border-black/15 dark:border-white/25 hover:border-black/30 dark:hover:border-white/45 shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.85),inset_0_-2px_4px_rgba(0,0,0,0.12),0_12px_32px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_1.5px_2px_rgba(255,255,255,0.35),inset_0_-2px_5px_rgba(0,0,0,0.65),0_14px_36px_rgba(0,0,0,0.5)] hover:shadow-[inset_0_1.5px_3px_rgba(255,255,255,0.95),inset_0_-2px_5px_rgba(0,0,0,0.2),0_16px_40px_rgba(0,0,0,0.14)] dark:hover:shadow-[inset_0_1.5px_3px_rgba(255,255,255,0.5),inset_0_-2px_6px_rgba(0,0,0,0.75),0_18px_44px_rgba(0,0,0,0.7)] transition-all duration-500 hover:scale-[1.04] active:scale-[0.97] flex items-center justify-center before:absolute before:inset-x-3 before:top-1 before:h-[35%] before:rounded-full before:bg-gradient-to-b before:from-white/50 dark:before:from-white/30 before:to-transparent before:pointer-events-none"
               >
                 {/* Ambient liquid sheen ray */}
                 <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/30 dark:via-white/20 to-transparent pointer-events-none animate-liquid-glass"></span>
 
                 <span className="relative z-10 font-bold opacity-80 group-hover:opacity-100 group-hover:text-red-600 dark:group-hover:text-red-400 transition-all duration-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)]">
-                  CONTACTO
+                  ENTRAR EN XENIA
                 </span>
               </a>
             </div>

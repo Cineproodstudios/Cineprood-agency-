@@ -8,8 +8,7 @@ const sections = [
   { id: 'proyectos', name: 'PROYECTOS' },
   { id: 'fotos', name: 'FOTOS' },
   { id: 'redes', name: 'REDES' },
-  { id: 'manifiesto', name: 'MANIFIESTO' },
-  { id: 'contacto', name: 'CONTACTO' }
+  { id: 'xenia', name: 'XENIA' }
 ];
 
 interface NavbarProps {
@@ -132,7 +131,12 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  if (s.id === 'xenia') {
+                    window.dispatchEvent(new CustomEvent('enter-xenia'));
+                  }
+                }}
                 onMouseEnter={() => setHoveredSection(s.id)}
                 onMouseLeave={() => setHoveredSection(null)}
                 className={`group relative flex items-baseline gap-6 transition-all duration-500 ${

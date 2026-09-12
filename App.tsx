@@ -8,14 +8,14 @@ import Proyectos from './components/Proyectos';
 import Fotos from './components/Fotos';
 import RedesSociales from './components/RedesSociales';
 import Reveal from './components/Reveal';
-import Manifiesto from './components/Manifiesto';
-import Contacto from './components/Contacto';
+import XeniaTransition from './components/XeniaTransition';
 import Footer from './components/Footer';
 import VideoModal from './components/VideoModal';
 
 const App: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [hasEnteredXenia, setHasEnteredXenia] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -61,11 +61,14 @@ const App: React.FC = () => {
 
         <Fotos />
         <RedesSociales />
-        <Manifiesto />
-        <Contacto />
+        <XeniaTransition
+          hasEnteredXenia={hasEnteredXenia}
+          onEnterXenia={() => setHasEnteredXenia(true)}
+          onExitXenia={() => setHasEnteredXenia(false)}
+        />
       </main>
 
-      <Footer />
+      {!hasEnteredXenia && <Footer />}
 
       {selectedVideo && (
         <VideoModal 
