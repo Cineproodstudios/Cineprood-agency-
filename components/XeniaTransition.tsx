@@ -135,11 +135,10 @@ export const XeniaTransition: React.FC<XeniaTransitionProps> = ({
     return () => mediaQuery.removeEventListener('change', handleMotionChange);
   }, []);
 
-  // Scrubbed Scroll with requestAnimationFrame & LERP damping
-  // 380vh Virtual Track:
-  // - High inertia & controlled heavy camera feel
-  // - currentProgress += (targetProgress - currentProgress) * 0.045
-  // - Normalizes wheel inputs to prevent accidental rapid skipping
+  // Scrubbed Scroll with requestAnimationFrame & responsive damping
+  // Fast and punchy ~150vh Virtual Track:
+  // - High responsiveness with subtle damping (factor 0.16)
+  // - Only a few clear wheel movements needed to traverse the portal
   // - Visual camera is 100dvh sticky locked
   useEffect(() => {
     if (hasEnteredXenia || isPopping) {
@@ -166,21 +165,21 @@ export const XeniaTransition: React.FC<XeniaTransitionProps> = ({
       targetProgressRef.current = clamped;
     };
 
-    // Low-speed heavy camera damping:
-    // currentProgress += (targetProgress - currentProgress) * 0.045
-    // Provides controlled inertia without drifting endlessly
+    // Agile camera damping:
+    // currentProgress += (targetProgress - currentProgress) * 0.16
+    // Feels direct, crisp and immediate without jerky steps
     const tick = () => {
       const target = targetProgressRef.current;
       const current = currentProgressRef.current;
       const diff = target - current;
 
-      if (Math.abs(diff) > 0.00015) {
-        const next = current + diff * 0.045;
+      if (Math.abs(diff) > 0.0005) {
+        const next = current + diff * 0.16;
         currentProgressRef.current = next;
         setCurrentProgress(next);
 
-        // Climax point reached -> triggers the POP and enters Xenia!
-        if (next >= 0.982 && target >= 0.982) {
+        // Climax point reached (>= 94%) -> triggers the POP and enters Xenia!
+        if (next >= 0.94 && target >= 0.92) {
           currentProgressRef.current = 1;
           setCurrentProgress(1);
           triggerPopAndEnter();
@@ -190,7 +189,7 @@ export const XeniaTransition: React.FC<XeniaTransitionProps> = ({
         currentProgressRef.current = target;
         setCurrentProgress(target);
 
-        if (target >= 0.982) {
+        if (target >= 0.92) {
           currentProgressRef.current = 1;
           setCurrentProgress(1);
           triggerPopAndEnter();
@@ -260,138 +259,131 @@ export const XeniaTransition: React.FC<XeniaTransitionProps> = ({
   }
 
   // =========================================================================
-  // STATE 1: CINEMATIC 6-ACT SUSPENSE PORTAL SEQUENCE (380vh track, camera locked 100dvh)
+  // STATE 1: ACCELERATED CINEMATIC PORTAL SEQUENCE (~150vh, camera locked 100dvh)
   //
-  // Act 1 (0% - 30%): NORMALIDAD / ALGO CAMBIA
-  //   - Almost nothing happens. Very subtle edge blur (<4px), faint spectral tint.
-  //   - "Hablar con Xenia" remains completely readable and calm.
-  //   - No Xenia revelation yet. Builds quiet anticipation.
+  // Fase 1 (0% - 20%): ARRANQUE INMEDIATO
+  //   - Comienza de inmediato sin demoras: pequeño blur, ligera refracción,
+  //   - Comienzan a deslizarse las barras cinematográficas (0vh -> 5vh).
   //
-  // Act 2 (30% - 60%): ENTRADA Y FORMACIÓN
-  //   - Letterbox bars gently slide in from 0vh up to 7vh.
-  //   - Depth begins to expand; portal rings form.
-  //   - "Hablar con Xenia" slowly dissolves.
-  //   - Xenia only faintly hints in the deep background (<15% opacity).
+  // Fase 2 (20% - 60%): ENTRADA Y PROFUNDIDAD EN EL PORTAL
+  //   - Distorsión visible, refracción cáustica, túnel óptico, zoom sutil.
+  //   - Xenia empieza a revelarse claramente detrás.
+  //   - Barras continúan hasta 8.5vh.
   //
-  // Act 3 (60% - 82%): PROFUNDIDAD Y TENSIÓN CRECIENTE
-  //   - Optical tunnel closes around user; bars reach 9.5vh.
-  //   - Rhythmic tension pauses: refraction expands, pauses, then pulses.
-  //   - Chromatic separation increases (cyan/magenta split).
-  //   - Xenia becomes recognizable as a silhouette, but heavily diffused.
+  // Fase 3 (60% - 90%): INTENSIDAD CRECIENTE Y ATRAVESAR
+  //   - Mayor distorsión y efecto prismático.
+  //   - Barras completas (10vh). Sensación contundente de atravesar el portal.
   //
-  // Act 4 (82% - 96%): CLÍMAX SOSTENIDO ("Estás a punto de atravesarlo")
-  //   - Bars locked at 10.5vh. Heavy visual compression.
-  //   - Intense optical energy, anamorphic horizon streak, lens bloom.
-  //   - Sustained across multiple deliberate scroll wheel movements.
-  //
-  // Act 5 (96% - 100%): ACELERACIÓN FINAL & UMBRAL CRÍTICO
-  //   - Rapid buildup in the last 4%: peak refraction, high chromatic split.
-  //
-  // Act 6 (100%): POP -> FLASH -> BARS RETRACT -> CALM & CLARITY
+  // Fase 4 (90% - 100%): CLÍMAX BREVE & POP
+  //   - Distorsión fuerte durante muy poco tiempo.
+  //   - POP instantáneo: flash -> desaparece distorsión -> Xenia nítida -> barras se retiran.
   // =========================================================================
 
   const p = currentProgress;
 
   // 1. Cinematic letterbox bars height (0vh -> 10.5vh)
-  // Act 1 (0-30%): 0vh
-  // Act 2 (30-60%): 0vh -> 7vh
-  // Act 3 (60-82%): 7vh -> 9.5vh
-  // Act 4 (82-100%): 9.5vh -> 10.5vh
+  // 0% - 20%: 0vh -> 5vh
+  // 20% - 60%: 5vh -> 8.5vh
+  // 60% - 100%: 8.5vh -> 10.5vh
   let barHeightVh = 0;
-  if (p >= 0.28 && p < 0.60) {
-    barHeightVh = ((p - 0.28) / 0.32) * 7.0;
-  } else if (p >= 0.60 && p < 0.82) {
-    barHeightVh = 7.0 + ((p - 0.60) / 0.22) * 2.5;
-  } else if (p >= 0.82) {
-    barHeightVh = 9.5 + ((p - 0.82) / 0.18) * 1.2; // Max ~10.7vh
+  if (p > 0.02 && p < 0.20) {
+    barHeightVh = ((p - 0.02) / 0.18) * 5.0;
+  } else if (p >= 0.20 && p < 0.60) {
+    barHeightVh = 5.0 + ((p - 0.20) / 0.40) * 3.5;
+  } else if (p >= 0.60) {
+    barHeightVh = 8.5 + ((p - 0.60) / 0.40) * 2.0;
   }
 
-  // 2. Optical tunnel scales with differential parallax
-  const portalTextScale = 1 + p * 0.08;
-  const tunnelRingsScale = 1 + (p < 0.30 ? p * 0.10 : 0.03 + p * 0.25);
-  const xeniaDepthScale = 0.92 + p * 0.09;
+  // 2. Optical tunnel scales with punchy parallax
+  const portalTextScale = 1 + p * 0.14;
+  const tunnelRingsScale = 1 + p * 0.38;
+  const xeniaDepthScale = 0.90 + p * 0.11;
 
-  // 3. Portal text "Hablar con Xenia" opacity
-  // Stays strong during Act 1 (0-30%), fades gently in Act 2 (30-55%)
-  const portalTextOpacity = p < 0.30 
+  // 3. Portal text "Hablar con Xenia" opacity (desvanece con agilidad en 0% - 40%)
+  const portalTextOpacity = p < 0.05 
     ? 1 
-    : Math.max(0, 1 - (p - 0.30) / 0.25);
+    : Math.max(0, 1 - (p - 0.05) / 0.35);
 
-  // 4. Dynamic Blur with staged pauses:
-  // Act 1 (0-30%): 0 -> 3px (almost imperceptible)
-  // Act 2 (30-60%): 3px -> 12px
-  // Act 3 (60-82%): 12px -> 20px (staged tension)
-  // Act 4 (82-96%): 20px -> 28px
-  // Act 5 (96-100%): 28px -> 36px
+  // 4. Dynamic Blur:
+  // 0% - 20%: 0 -> 4px
+  // 20% - 60%: 4px -> 16px
+  // 60% - 90%: 16px -> 26px
+  // 90% - 100%: 26px -> 34px breve
   let edgeBlurPx = 0;
   let centerBlurPx = 0;
-  if (p >= 0.12 && p < 0.30) {
-    edgeBlurPx = ((p - 0.12) / 0.18) * 3.5;
-    centerBlurPx = ((p - 0.12) / 0.18) * 1.5;
-  } else if (p >= 0.30 && p < 0.60) {
-    edgeBlurPx = 3.5 + ((p - 0.30) / 0.30) * 10;
-    centerBlurPx = 1.5 + ((p - 0.30) / 0.30) * 4.5;
-  } else if (p >= 0.60 && p < 0.82) {
-    edgeBlurPx = 13.5 + ((p - 0.60) / 0.22) * 9;
-    centerBlurPx = 6.0 + ((p - 0.60) / 0.22) * 5.5;
-  } else if (p >= 0.82) {
-    const climaxFactor = Math.pow((p - 0.82) / 0.18, 2.2);
-    edgeBlurPx = 22.5 + climaxFactor * 14;
-    centerBlurPx = 11.5 + climaxFactor * 8.5;
+  if (p < 0.20) {
+    const f = p / 0.20;
+    edgeBlurPx = f * 4.5;
+    centerBlurPx = f * 2.5;
+  } else if (p >= 0.20 && p < 0.60) {
+    const f = (p - 0.20) / 0.40;
+    edgeBlurPx = 4.5 + f * 12.0;
+    centerBlurPx = 2.5 + f * 7.0;
+  } else if (p >= 0.60 && p < 0.90) {
+    const f = (p - 0.60) / 0.30;
+    edgeBlurPx = 16.5 + f * 10.0;
+    centerBlurPx = 9.5 + f * 6.5;
+  } else {
+    const f = (p - 0.90) / 0.10;
+    edgeBlurPx = 26.5 + f * 7.5;
+    centerBlurPx = 16.0 + f * 4.5;
   }
 
-  // 5. Chromatic displacement / RGB offset with suspense plateaus
+  // 5. Chromatic displacement / RGB offset
+  // 0% - 20%: 0 -> 2px
+  // 20% - 60%: 2px -> 6px
+  // 60% - 90%: 6px -> 12px
+  // 90% - 100%: 12px -> 16px (pico breve)
   let chromaticOffset = 0;
-  if (p >= 0.32 && p < 0.60) {
-    chromaticOffset = ((p - 0.32) / 0.28) * 3;
-  } else if (p >= 0.60 && p < 0.82) {
-    // Tension plateau: stays between 3px and 6px with subtle oscillation
-    chromaticOffset = 3 + ((p - 0.60) / 0.22) * 3.5;
-  } else if (p >= 0.82) {
-    // Climax surge: climbs up to 16px
-    chromaticOffset = 6.5 + Math.pow((p - 0.82) / 0.18, 2.4) * 10.5;
+  if (p < 0.20) {
+    chromaticOffset = (p / 0.20) * 2.2;
+  } else if (p >= 0.20 && p < 0.60) {
+    chromaticOffset = 2.2 + ((p - 0.20) / 0.40) * 4.2;
+  } else if (p >= 0.60 && p < 0.90) {
+    chromaticOffset = 6.4 + ((p - 0.60) / 0.30) * 5.8;
+  } else {
+    chromaticOffset = 12.2 + ((p - 0.90) / 0.10) * 4.0;
   }
 
   // 6. Prism / Caustic refractions intensity
   let prismIntensity = 0;
-  if (p >= 0.15 && p < 0.30) {
-    prismIntensity = ((p - 0.15) / 0.15) * 0.18; // Very subtle start
-  } else if (p >= 0.30 && p < 0.60) {
-    prismIntensity = 0.18 + ((p - 0.30) / 0.30) * 0.45;
-  } else if (p >= 0.60 && p < 0.82) {
-    // Subtle breathing pulse of light
-    const pulse = Math.sin(p * 20) * 0.04;
-    prismIntensity = 0.63 + ((p - 0.60) / 0.22) * 0.18 + pulse;
-  } else if (p >= 0.82) {
-    prismIntensity = 0.81 + Math.pow((p - 0.82) / 0.18, 2.0) * 0.19;
+  if (p < 0.20) {
+    prismIntensity = (p / 0.20) * 0.25;
+  } else if (p >= 0.20 && p < 0.60) {
+    prismIntensity = 0.25 + ((p - 0.20) / 0.40) * 0.45;
+  } else if (p >= 0.60 && p < 0.90) {
+    prismIntensity = 0.70 + ((p - 0.60) / 0.30) * 0.22;
+  } else {
+    prismIntensity = 0.92 + ((p - 0.90) / 0.10) * 0.08;
   }
 
-  // 7. Bloom / Anamorphic core intensity (peaks strictly in Act 4 and 5)
-  const bloomOpacity = p >= 0.78 ? Math.pow((p - 0.78) / 0.22, 2.8) * 0.85 : 0;
+  // 7. Bloom / Anamorphic streak (entra con fuerza en 60% - 90%)
+  const bloomOpacity = p >= 0.55 ? Math.min(1, Math.pow((p - 0.55) / 0.35, 1.8) * 0.95) : 0;
 
   // 8. Xenia emerging behind the optical tunnel:
-  // Act 1 (0-30%): completely hidden (0)
-  // Act 2 (30-60%): faint suggestion (0 -> 0.18)
-  // Act 3 (60-82%): recognizable silhouette (0.18 -> 0.55)
-  // Act 4 (82-96%): clear presence behind glass (0.55 -> 0.88)
-  // Act 5 (96-100%): 0.88 -> 0.95 until POP cuts to 1.00
+  // 0% - 20%: 0 -> 0.08
+  // 20% - 60%: 0.08 -> 0.55 (claramente visible)
+  // 60% - 90%: 0.55 -> 0.90
+  // 90% - 100%: 0.90 -> 0.98 hasta el POP definitivo (1.00)
   let xeniaOpacity = 0;
-  if (p >= 0.35 && p < 0.60) {
-    xeniaOpacity = ((p - 0.35) / 0.25) * 0.18;
-  } else if (p >= 0.60 && p < 0.82) {
-    xeniaOpacity = 0.18 + ((p - 0.60) / 0.22) * 0.38;
-  } else if (p >= 0.82) {
-    xeniaOpacity = 0.56 + Math.pow((p - 0.82) / 0.18, 1.2) * 0.38;
+  if (p < 0.20) {
+    xeniaOpacity = (p / 0.20) * 0.08;
+  } else if (p >= 0.20 && p < 0.60) {
+    xeniaOpacity = 0.08 + ((p - 0.20) / 0.40) * 0.47;
+  } else if (p >= 0.60 && p < 0.90) {
+    xeniaOpacity = 0.55 + ((p - 0.60) / 0.30) * 0.35;
+  } else {
+    xeniaOpacity = 0.90 + ((p - 0.90) / 0.10) * 0.08;
   }
 
-  // 9. Micro-vibration of camera in the deep climax (85% - 98%)
-  const vibrationPx = p > 0.85 ? (Math.sin(p * 90) * Math.pow((p - 0.85) / 0.15, 2) * 1.2) : 0;
+  // 9. Micro-vibration of camera in the deep climax (80% - 98%)
+  const vibrationPx = p > 0.80 ? (Math.sin(p * 70) * Math.pow((p - 0.80) / 0.20, 1.6) * 1.4) : 0;
 
   return (
     <section
       ref={containerRef}
       id="xenia"
-      className="relative h-[380vh] bg-white dark:bg-black text-black dark:text-white transition-colors duration-700"
+      className="relative h-[150vh] bg-white dark:bg-black text-black dark:text-white transition-colors duration-700"
     >
       <span id="agente" className="absolute top-0 opacity-0 pointer-events-none"></span>
       <span id="contacto" className="absolute top-0 opacity-0 pointer-events-none"></span>
@@ -399,7 +391,7 @@ export const XeniaTransition: React.FC<XeniaTransitionProps> = ({
       {/* 
         STICKY 100dvh VIEWPORT:
         Visual camera is completely locked in place.
-        The user does not see the page moving down; they are traveling into a portal.
+        The user travels into the portal with high-impact, short-distance scroll.
       */}
       <div 
         className="sticky top-0 h-[100dvh] w-full overflow-hidden flex items-center justify-center will-change-transform select-none"
@@ -459,149 +451,119 @@ export const XeniaTransition: React.FC<XeniaTransitionProps> = ({
                   filter: `blur(${chromaticOffset * 0.35}px)`
                 }}
               >
-                Hablar con <span className="text-red-500">Xenia</span>
+                Hablar con <span className="text-rose-500">Xenia</span>
               </h2>
             )}
 
-            <h2
-              onClick={triggerPopAndEnter}
-              className="relative text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-none cursor-pointer select-none transition-colors hover:text-red-600 z-10"
-            >
+            {/* Main Portal Title */}
+            <h2 className="relative text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-none">
               Hablar con <span className="text-red-600">Xenia</span>
             </h2>
-          </div>
-        )}
+            
+            <p className="mt-4 text-xs md:text-sm font-mono tracking-[0.25em] uppercase opacity-40">
+              [ AGENTE AUDIOVISUAL INTELIGENTE ]
+            </p>
 
-        {/* ================================================================= */}
-        {/* LAYER 2: OPTICAL TUNNEL & REFRACTION RINGS                        */}
-        {/* Deforms from edges inward, creating depth and forward suction     */}
-        {/* ================================================================= */}
-        {prismIntensity > 0.01 && (
-          <div
-            className="absolute inset-0 pointer-events-none z-10 will-change-[opacity]"
-            style={{ opacity: Math.min(1, prismIntensity) }}
-          >
-            {/* Spectral caustics film */}
             <div 
-              className="absolute inset-0 prism-caustics-layer opacity-55 mix-blend-screen dark:mix-blend-screen" 
-              style={{
-                transform: `rotate(${p * 20}deg) scale(${1 + p * 0.16})`,
-                filter: `hue-rotate(${p * 65}deg)`
-              }}
-            />
-
-            {/* Radial Vignette Mask: Keeps center clear, pulls edges into deep portal */}
-            <div 
-              className="absolute inset-0"
-              style={{
-                background: `
-                  radial-gradient(ellipse at 50% 50%, transparent 22%, rgba(0,0,0,${0.15 + p * 0.35}) 85%),
-                  radial-gradient(ellipse at top left, rgba(255, 0, 100, ${0.14 + prismIntensity * 0.28}), transparent 50%),
-                  radial-gradient(ellipse at top right, rgba(0, 220, 255, ${0.14 + prismIntensity * 0.28}), transparent 50%),
-                  radial-gradient(ellipse at bottom left, rgba(160, 40, 255, ${0.12 + prismIntensity * 0.24}), transparent 55%),
-                  radial-gradient(ellipse at bottom right, rgba(255, 220, 80, ${0.10 + prismIntensity * 0.20}), transparent 50%)
-                `
-              }}
-            />
-
-            {/* Concentric Portal Tunnel Rings (Differential Parallax) */}
-            <div 
-              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-              style={{
-                transform: `scale(${tunnelRingsScale})`
-              }}
+              onClick={triggerPopAndEnter}
+              className="mt-8 px-6 py-2.5 rounded-full border border-black/15 dark:border-white/15 bg-black/5 dark:bg-white/5 backdrop-blur-md text-[11px] font-mono tracking-widest uppercase hover:bg-red-600 hover:text-white hover:border-red-600 transition-all cursor-pointer group"
             >
-              {/* Outer Ring */}
-              <div 
-                className="w-[92vw] max-w-6xl h-[72vh] rounded-full opacity-38 blur-[36px] border border-white/25 pointer-events-none"
-                style={{
-                  background: 'conic-gradient(from 180deg at 50% 50%, rgba(255,0,80,0.28) 0deg, rgba(0,220,255,0.28) 120deg, rgba(180,60,255,0.28) 240deg, rgba(255,0,80,0.28) 360deg)'
-                }}
-              />
-              {/* Inner Portal Aperture Ring */}
-              <div 
-                className="absolute w-[55vw] max-w-3xl h-[45vh] rounded-full opacity-45 blur-[24px] border border-cyan-400/35 pointer-events-none"
-                style={{
-                  transform: `scale(${1 + p * 0.28})`,
-                  background: 'radial-gradient(circle, rgba(0,220,255,0.18) 0%, rgba(255,0,80,0.12) 60%, transparent 80%)'
-                }}
-              />
+              <span className="group-hover:translate-x-0.5 inline-block transition-transform">
+                Iniciar conversación ↓
+              </span>
             </div>
           </div>
         )}
 
         {/* ================================================================= */}
-        {/* LAYER 3: CLIMAX BLOOM & HORIZONTAL ANAMORPHIC FLARE               */}
+        {/* LAYER 2: XENIA EXPERIENCE EMERGENCE                               */}
         {/* ================================================================= */}
-        {bloomOpacity > 0.02 && (
+        <div
+          className="absolute inset-0 w-full h-full will-change-[transform,opacity,filter]"
+          style={{
+            opacity: xeniaOpacity,
+            transform: `scale(${xeniaDepthScale})`,
+            filter: edgeBlurPx > 0.4 ? `blur(${edgeBlurPx}px)` : 'none',
+          }}
+        >
+          <XeniaExperience 
+            isActive={p > 0.60} 
+            opacity={xeniaOpacity} 
+            onExit={handleExitXenia} 
+          />
+        </div>
+
+        {/* ================================================================= */}
+        {/* LAYER 3: CONCENTRIC OPTICAL TUNNEL RINGS                           */}
+        {/* ================================================================= */}
+        {p > 0.05 && p < 0.98 && (
           <div 
-            className="absolute inset-0 pointer-events-none z-15 mix-blend-screen will-change-[opacity]"
-            style={{ opacity: bloomOpacity }}
+            className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-20"
+            style={{
+              transform: `scale(${tunnelRingsScale})`,
+              opacity: prismIntensity,
+            }}
           >
+            {/* Outer chromatic ring */}
             <div 
-              className="absolute inset-0"
+              className="absolute w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] rounded-full border border-cyan-500/20 prism-edge-refraction"
               style={{
-                background: 'radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.42) 0%, rgba(0, 220, 255, 0.28) 35%, rgba(255, 0, 80, 0.18) 65%, transparent 85%)'
+                transform: `scale(${1 + p * 0.15})`,
+                filter: `blur(${1 + p * 2}px)`
               }}
             />
-            {/* Horizon anamorphic streak line */}
+            {/* Mid ring */}
             <div 
-              className="absolute top-1/2 left-0 w-full h-[3px] -translate-y-1/2 blur-[2px] opacity-85"
+              className="absolute w-[60vw] h-[60vw] max-w-[680px] max-h-[680px] rounded-full border border-rose-500/25 prism-edge-refraction"
               style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(0,220,255,0.85) 25%, rgba(255,255,255,1) 50%, rgba(255,0,80,0.85) 75%, transparent 100%)',
-                transform: `scaleX(${0.5 + Math.pow(Math.max(0, (p - 0.78) / 0.22), 2) * 0.9}) scaleY(${1 + Math.pow(Math.max(0, (p - 0.78) / 0.22), 2) * 4})`
+                transform: `scale(${1 + p * 0.28})`,
+                filter: `blur(${0.5 + p * 1.5}px)`
+              }}
+            />
+            {/* Core aperture ring */}
+            <div 
+              className="absolute w-[38vw] h-[38vw] max-w-[420px] max-h-[420px] rounded-full border border-white/30"
+              style={{
+                transform: `scale(${1 + p * 0.42})`
               }}
             />
           </div>
         )}
 
         {/* ================================================================= */}
-        {/* LAYER 4: PROGRESSIVE FROSTED GLASS / RADIAL BLUR MASK             */}
+        {/* LAYER 4: SPECTRAL CAUSTICS & PRISM DISPERSION                      */}
         {/* ================================================================= */}
-        {edgeBlurPx > 0.4 && (
-          <div
-            className="absolute inset-0 pointer-events-none z-20 backdrop-blur-sm will-change-[backdrop-filter]"
+        {prismIntensity > 0.02 && p < 0.98 && (
+          <div 
+            className="absolute inset-0 pointer-events-none z-25 prism-caustics-layer mix-blend-color-dodge transition-opacity duration-150"
             style={{
-              backdropFilter: `blur(${edgeBlurPx}px)`,
-              WebkitBackdropFilter: `blur(${edgeBlurPx}px)`
+              opacity: prismIntensity * 0.85
             }}
           />
         )}
 
         {/* ================================================================= */}
-        {/* LAYER 5: XENIA EMERGING FROM THE DEPTHS OF THE PORTAL             */}
-        {/* Parallax depth: scales from 0.92 -> 1.01, clearing behind blur    */}
+        {/* LAYER 5: ANAMORPHIC HORIZON STREAK & LENS BLOOM (Climax peak)     */}
         {/* ================================================================= */}
-        {xeniaOpacity > 0.005 && (
-          <div
-            className="absolute inset-0 z-30 flex items-center justify-center will-change-[opacity,transform,filter] pointer-events-none"
-            style={{
-              opacity: xeniaOpacity,
-              transform: `scale(${xeniaDepthScale})`,
-              filter: centerBlurPx > 0.4 ? `blur(${centerBlurPx * 0.45}px)` : 'none'
-            }}
+        {bloomOpacity > 0.02 && (
+          <div 
+            className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center mix-blend-screen transition-opacity duration-100"
+            style={{ opacity: bloomOpacity }}
           >
-            {/* Chromatic aberration clone for Xenia near climax */}
-            {chromaticOffset > 2 && (
-              <div 
-                className="absolute inset-0 opacity-40 mix-blend-screen text-cyan-400 pointer-events-none"
-                style={{
-                  transform: `translate(${-chromaticOffset * 0.55}px, ${chromaticOffset * 0.28}px)`,
-                  filter: `blur(${chromaticOffset * 0.35}px)`
-                }}
-              >
-                <XeniaExperience isActive={false} opacity={xeniaOpacity * 0.5} onExit={handleExitXenia} />
-              </div>
-            )}
-            <XeniaExperience isActive={false} opacity={xeniaOpacity} onExit={handleExitXenia} />
+            {/* Horizontal anamorphic flare beam */}
+            <div className="w-full h-[3px] bg-gradient-to-r from-transparent via-cyan-300 to-transparent blur-[1px]" />
+            <div className="absolute w-full h-[14px] bg-gradient-to-r from-transparent via-white/80 to-transparent blur-[4px]" />
+            {/* Central energy glare */}
+            <div className="absolute w-48 h-48 rounded-full bg-gradient-to-tr from-cyan-400/30 via-white/60 to-rose-400/30 blur-2xl" />
           </div>
         )}
 
-        {/* Impact Flash Frame during the POP */}
+        {/* ================================================================= */}
+        {/* LAYER 6: IMPACT FLASH FRAME (~120ms optical discharge)             */}
+        {/* ================================================================= */}
         {showImpactFlash && (
-          <div className="absolute inset-0 pointer-events-none z-50 animate-impact-flash bg-gradient-to-tr from-cyan-400/40 via-white/90 to-rose-500/40 mix-blend-overlay backdrop-blur-[3px]" />
+          <div className="absolute inset-0 pointer-events-none z-50 animate-impact-flash bg-gradient-to-tr from-cyan-400/50 via-white/95 to-rose-500/50 mix-blend-overlay backdrop-blur-[3px]" />
         )}
-
       </div>
     </section>
   );

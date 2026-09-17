@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 
 const sections = [
   { id: 'hero', name: 'INICIO' },
-  { id: 'origen', name: 'ORIGEN' },
+  { id: 'historia', name: 'ORIGEN' },
   { id: 'modos', name: 'MODOS' },
   { id: 'proyectos', name: 'PROYECTOS' },
   { id: 'fotos', name: 'FOTOS' },
@@ -14,11 +13,11 @@ const sections = [
 interface NavbarProps {
   onToggleTheme: () => void;
   isDarkMode: boolean;
+  isVideoActive?: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
+const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode, isVideoActive = false }) => {
   const [activeSectionId, setActiveSectionId] = useState('hero');
-  const [currentIndex, setCurrentIndex] = useState(1);
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
@@ -30,7 +29,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
 
     const observerOptions = {
       root: null,
-      rootMargin: '-40% 0px -40% 0px',
+      rootMargin: '-30% 0px -30% 0px',
       threshold: 0
     };
 
@@ -38,8 +37,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           setActiveSectionId(entry.target.id);
-          const index = sections.findIndex(s => s.id === entry.target.id);
-          setCurrentIndex(index + 1);
         }
       });
     };
@@ -51,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
       if (el) observer.observe(el);
     });
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       observer.disconnect();
       window.removeEventListener('scroll', handleScroll);
@@ -59,14 +56,27 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
   }, []);
 
   const currentSection = sections.find(s => s.id === activeSectionId);
+  const isVideoSection = isVideoActive || activeSectionId === 'historia' || activeSectionId === 'origen';
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 w-full z-[70] transition-all duration-700 border-b ${
-        scrolled 
-          ? 'py-4 bg-white/30 dark:bg-black/30 backdrop-blur-2xl border-black/5 dark:border-white/5' 
-          : 'py-8 bg-transparent border-transparent'
-      }`}>
+      {/* 
+        NAVBAR VISIBILITY:
+        - When video is active: translateY(-100%), opacity: 0, pointer-events: none
+        - Transition: 400ms cubic-bezier(0.16, 1, 0.3, 1)
+        - When returning to hero or next section: translateY(0), opacity: 1
+      */}
+      <nav 
+        className={`fixed top-0 left-0 w-full z-[70] border-b transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isVideoSection 
+            ? '-translate-y-full opacity-0 pointer-events-none' 
+            : 'translate-y-0 opacity-100 pointer-events-auto'
+        } ${
+          scrolled 
+            ? 'py-4 bg-white/30 dark:bg-black/30 backdrop-blur-2xl border-black/5 dark:border-white/5' 
+            : 'py-8 bg-transparent border-transparent'
+        }`}
+      >
         {/* Refraction effect overlay */}
         <div className="absolute inset-0 opacity-20 pointer-events-none bg-gradient-to-b from-white/10 dark:from-white/5 to-transparent"></div>
         
@@ -81,16 +91,20 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
             </a>
           </div>
 
-          {/* Centered Active Section / Menu Indicator */}
+          {/* 
+            Centered Active Section:
+            Simple clean navigation indicator.
+            NO DROPDOWN on hover, NO table, NO panel.
+            Only opens the full-screen menu when explicitly clicked.
+          */}
           <div 
-            className="absolute left-1/2 -translate-x-1/2 pointer-events-auto cursor-pointer group/menu flex items-center justify-center py-2 px-4"
-            onMouseEnter={() => setIsMenuOpen(true)}
+            className="absolute left-1/2 -translate-x-1/2 pointer-events-auto cursor-pointer group/menu flex items-center justify-center py-2 px-4 select-none"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Abrir menú de navegación"
+            aria-label="Abrir menú"
           >
             <span 
               key={activeSectionId}
-              className="text-[10px] md:text-[11px] font-black tracking-[0.5em] uppercase opacity-80 dark:opacity-80 animate-slide-up group-hover/menu:text-red-600 group-hover/menu:opacity-100 transition-colors text-center"
+              className="text-[10px] md:text-[11px] font-black tracking-[0.5em] uppercase opacity-80 dark:opacity-80 animate-slide-up group-hover/menu:text-red-600 group-hover/menu:opacity-100 transition-all text-center"
             >
               {currentSection?.name}
             </span>
@@ -114,15 +128,17 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
         </div>
       </nav>
 
-      {/* Full Screen Menu Overlay */}
+      {/* Full Screen Menu Overlay - only openable on explicit click */}
       <div 
         className={`fixed inset-0 z-[65] transition-all duration-700 ease-expo ${
           isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
-        onMouseLeave={() => setIsMenuOpen(false)}
       >
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-white/95 dark:bg-black/95 backdrop-blur-3xl"></div>
+        <div 
+          className="absolute inset-0 bg-white/95 dark:bg-black/95 backdrop-blur-3xl"
+          onClick={() => setIsMenuOpen(false)}
+        />
         
         {/* Content */}
         <div className="relative h-full w-full flex flex-col items-center justify-center px-6">
@@ -154,10 +170,13 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
             ))}
           </div>
 
-          {/* Close hint */}
-          <div className="absolute bottom-12 text-[9px] font-mono tracking-[0.5em] uppercase opacity-20">
-            Mueve el ratón fuera para cerrar
-          </div>
+          {/* Close button */}
+          <button 
+            onClick={() => setIsMenuOpen(false)}
+            className="absolute bottom-12 text-[10px] font-mono tracking-[0.4em] uppercase opacity-40 hover:opacity-100 hover:text-red-600 transition-all cursor-pointer"
+          >
+            [ CERRAR MENÚ ]
+          </button>
         </div>
       </div>
 
@@ -166,11 +185,11 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleTheme, isDarkMode }) => {
           transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes slide-up {
-          from { transform: translateY(10px); opacity: 0; }
-          to { transform: translateY(0); opacity: 0.5; }
+          from { transform: translateY(8px); opacity: 0; }
+          to { transform: translateY(0); opacity: 0.8; }
         }
         .animate-slide-up {
-          animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         
         nav {

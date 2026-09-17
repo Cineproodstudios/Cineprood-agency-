@@ -13,6 +13,9 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://player.vimeo.com">
+    <link rel="preconnect" href="https://i.vimeocdn.com">
+    <link rel="preconnect" href="https://f.vimeocdn.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
         body {
@@ -187,6 +190,42 @@
 
         .animate-letterbox-retract-bottom {
             animation: letterboxRetractBottom 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Fullscreen Edge-to-Edge Vimeo Player Integration */
+        .vimeo-native-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .vimeo-native-wrapper iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 ratio */
+            min-height: 100%;
+            min-width: 177.77dvh; /* 16:9 ratio in dynamic viewport height */
+            transform: translate(-50%, -50%);
+            border: 0;
+            pointer-events: none;
+        }
+
+        /* Subtle indicator release bounce: translateY(0px) -> translateY(4px) -> translateY(0px) */
+        @keyframes bounceSubtle {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(4px);
+            }
+        }
+
+        .animate-bounce-subtle {
+            animation: bounceSubtle 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         /* Reduced motion support */

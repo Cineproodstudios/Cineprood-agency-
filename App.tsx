@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Origen from './components/Origen';
+import HistoriaVideo from './components/HistoriaVideo';
 import Modos from './components/Modos';
 import Proyectos from './components/Proyectos';
 import Fotos from './components/Fotos';
@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [hasEnteredXenia, setHasEnteredXenia] = useState(false);
+  const [isVideoActive, setIsVideoActive] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,11 +38,11 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-black text-black dark:text-white selection:bg-red-600 selection:text-white min-h-screen transition-colors duration-500">
-      <Navbar onToggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+      <Navbar onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isVideoActive={isVideoActive} />
       
       <main>
         <Hero />
-        <Origen />
+        <HistoriaVideo onVideoActiveChange={setIsVideoActive} />
         <Modos />
         <Proyectos onOpenVideo={setSelectedVideo} />
         
