@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-black text-black dark:text-white selection:bg-red-600 selection:text-white min-h-screen transition-colors duration-500">
-      <Navbar onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isVideoActive={isVideoActive} />
+      <Navbar onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isVideoActive={isVideoActive || !!selectedVideo} />
       
       <main>
         <Hero />
