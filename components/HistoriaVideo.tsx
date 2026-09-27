@@ -311,14 +311,15 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
         CENTRAL CINEMATIC VIEWPORT (100dvh):
         - Video is centered both vertically and horizontally in the viewport.
         - Absolute protagonist of the screen.
-        - Zero cut-off, zero awkward margins above or below.
+        - Desktop: Full bleed 100dvh cinematic coverage.
+        - Mobile: Full 16:9 frame visible with zero cut-off / zero zoom, centered in 100dvh stage.
       */}
-      <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-black">
+      <div className="video-stage relative w-full h-full flex items-center justify-center overflow-hidden bg-black">
         
         {/* Vimeo native wrapper */}
         <div 
           ref={containerRef}
-          className="vimeo-native-wrapper absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none"
+          className="vimeo-native-wrapper pointer-events-none"
         />
 
         {/* Cinematic black mask during initial preload frame */}
@@ -330,7 +331,8 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
 
         {/* 
           MINIMALIST CINEMATIC BOTTOM INDICATOR:
-          - Elevated from bottom: bottom-[64px] sm:bottom-[72px] md:bottom-[80px]
+          - Desktop: bottom-22 lg:bottom-24
+          - Mobile: bottom-10 (comfortably in black lower bar)
           - Circular progress indicator filling over 0s -> 5s (stroke-dashoffset)
           - Subtle down arrow inside
           - Discreet text: "Seguir hacia abajo"
@@ -338,7 +340,7 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
         */}
         <div 
           onClick={canContinue ? handleScrollToNext : undefined}
-          className={`absolute bottom-16 sm:bottom-20 md:bottom-22 lg:bottom-24 inset-x-0 mx-auto w-fit flex flex-col items-center justify-center gap-2.5 z-20 transition-all duration-700 select-none ${
+          className={`absolute bottom-10 sm:bottom-16 md:bottom-22 lg:bottom-24 inset-x-0 mx-auto w-fit flex flex-col items-center justify-center gap-2.5 z-20 transition-all duration-700 select-none ${
             canContinue ? 'cursor-pointer group opacity-90 hover:opacity-100' : 'cursor-default opacity-60'
           }`}
         >

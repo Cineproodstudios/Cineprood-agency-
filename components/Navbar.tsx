@@ -4,10 +4,9 @@ const sections = [
   { id: 'hero', name: 'INICIO' },
   { id: 'historia', name: 'ORIGEN' },
   { id: 'modos', name: 'MODOS' },
-  { id: 'proyectos', name: 'PROYECTOS' },
+  { id: 'proyectos', name: 'PORTAFOLIO' },
   { id: 'fotos', name: 'FOTOS' },
-  { id: 'redes', name: 'REDES' },
-  { id: 'xenia', name: 'XENIA' }
+  { id: 'redes', name: 'REDES' }
 ];
 
 interface NavbarProps {

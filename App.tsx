@@ -4,18 +4,17 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import HistoriaVideo from './components/HistoriaVideo';
 import Modos from './components/Modos';
+import CinematicBanner from './components/CinematicBanner';
 import Proyectos from './components/Proyectos';
 import Fotos from './components/Fotos';
 import RedesSociales from './components/RedesSociales';
 import Reveal from './components/Reveal';
-import XeniaTransition from './components/XeniaTransition';
 import Footer from './components/Footer';
 import VideoModal from './components/VideoModal';
 
 const App: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [hasEnteredXenia, setHasEnteredXenia] = useState(false);
   const [isVideoActive, setIsVideoActive] = useState(false);
 
   useEffect(() => {
@@ -44,6 +43,7 @@ const App: React.FC = () => {
         <Hero />
         <HistoriaVideo onVideoActiveChange={setIsVideoActive} />
         <Modos />
+        <CinematicBanner onOpenVideo={setSelectedVideo} />
         <Proyectos onOpenVideo={setSelectedVideo} />
         
         {/* Transition Message */}
@@ -62,14 +62,9 @@ const App: React.FC = () => {
 
         <Fotos />
         <RedesSociales />
-        <XeniaTransition
-          hasEnteredXenia={hasEnteredXenia}
-          onEnterXenia={() => setHasEnteredXenia(true)}
-          onExitXenia={() => setHasEnteredXenia(false)}
-        />
       </main>
 
-      {!hasEnteredXenia && <Footer />}
+      <Footer />
 
       {selectedVideo && (
         <VideoModal 
