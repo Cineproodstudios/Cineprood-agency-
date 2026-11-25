@@ -284,6 +284,94 @@
             animation: bounceSubtle 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
+        /* Client Folder Cards — Transparent Logo Overlay & Desktop Hover Reveal */
+        .client-card .client-cover {
+            transform: scale(1);
+            filter: brightness(0.92);
+            transition:
+                transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+                filter 360ms cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+
+        .client-card .client-overlay {
+            background:
+                radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.18) 58%, rgba(0, 0, 0, 0.24) 100%);
+            opacity: 1;
+            transition: opacity 340ms cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity;
+        }
+
+        .client-card .client-meta-scrim {
+            background: linear-gradient(
+                to top,
+                rgba(0, 0, 0, 0.86) 0%,
+                rgba(0, 0, 0, 0.42) 34%,
+                rgba(0, 0, 0, 0) 64%
+            );
+            opacity: 0.92;
+            transition: opacity 340ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .client-card .client-logo-wrap {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            transition:
+                opacity 320ms cubic-bezier(0.16, 1, 0.3, 1),
+                transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+
+        .client-card .client-logo {
+            background: transparent;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.48));
+        }
+
+        .client-card .client-meta-inner {
+            transform: translateY(0);
+            transition: transform 340ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .client-card .client-arrow {
+            transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), color 240ms ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .client-card:hover .client-logo-wrap,
+            .client-card:focus-visible .client-logo-wrap {
+                opacity: 0;
+                transform: translateY(-6px) scale(0.96);
+            }
+
+            .client-card:hover .client-overlay,
+            .client-card:focus-visible .client-overlay {
+                opacity: 0;
+            }
+
+            .client-card:hover .client-meta-scrim,
+            .client-card:focus-visible .client-meta-scrim {
+                opacity: 0.72;
+            }
+
+            .client-card:hover .client-cover,
+            .client-card:focus-visible .client-cover {
+                transform: scale(1.03);
+                filter: brightness(1);
+            }
+
+            .client-card:hover .client-meta-inner,
+            .client-card:focus-visible .client-meta-inner {
+                transform: translateY(-3px);
+            }
+
+            .client-card:hover .client-arrow,
+            .client-card:focus-visible .client-arrow {
+                transform: translateX(4px);
+                color: #ef4444;
+            }
+        }
+
         /* Reduced motion support */
         @media (prefers-reduced-motion: reduce) {
             * {

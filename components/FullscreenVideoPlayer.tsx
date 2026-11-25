@@ -1,50 +1,43 @@
 import React, { useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 
-interface FullscreenVideoPlayerProps {
+export interface FullscreenVideoPlayerProps {
   videoUrl: string;
   onClose: () => void;
   autoplay?: boolean;
+  label?: string;
 }
 
 /**
  * Extrae de forma robusta el ID de Vimeo desde cualquier URL o string de ID.
- * Admite formatos:
- * - 1230682471
- * - https://vimeo.com/1230682471
- * - https://vimeo.com/1230682471?share=copy...
- * - https://player.vimeo.com/video/1230682471
  */
-export function extractVimeoId(input: string): string {
-  if (!input) return '';
+export function extractVimeoParams(input: string): { id: string; hash?: string } {
+  if (!input) return { id: '' };
   const trimmed = input.trim();
-  const match = trimmed.match(/(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/);
-  if (match && match[1]) {
-    return match[1];
-  }
-  // Si ya es un ID numérico puro
-  if (/^\d+$/.test(trimmed)) {
-    return trimmed;
-  }
-  return trimmed;
+  const idMatch = trimmed.match(/(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/);
+  const hashQueryMatch = trimmed.match(/[?&]h=([a-zA-Z0-9]+)/);
+  const hashPathMatch = trimmed.match(/vimeo\.com\/\d+\/([a-zA-Z0-9]+)/);
+
+  const id = idMatch?.[1] ?? (/^\d+$/.test(trimmed) ? trimmed : trimmed);
+  const hash = hashQueryMatch?.[1] ?? hashPathMatch?.[1];
+  return { id, hash };
 }
 
 export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
   videoUrl,
   onClose,
-  autoplay = true,
+  label,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef<number>(0);
 
-  // Normalizar la URL para el reproductor de Vimeo
-  const vimeoId = extractVimeoId(videoUrl);
-  const embedSrc = vimeoId.startsWith('http')
-    ? `${vimeoId}${vimeoId.includes('?') ? '&' : '?'}autoplay=1&muted=0&title=0&byline=0&portrait=0&badge=0`
-    : `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&title=0&byline=0&portrait=0&badge=0`;
+  const { id: vimeoId, hash: vimeoHash } = extractVimeoParams(videoUrl);
+  const hashParam = vimeoHash ? `&h=${encodeURIComponent(vimeoHash)}` : '';
+  const vimeoEmbedSrc = vimeoId.startsWith('http')
+    ? `${vimeoId}${vimeoId.includes('?') ? '&' : '?'}autoplay=1&title=0&byline=0&portrait=0${hashParam}`
+    : `https://player.vimeo.com/video/${encodeURIComponent(vimeoId)}?autoplay=1&title=0&byline=0&portrait=0${hashParam}`;
 
-  // Cerrar y salir de fullscreen
   const handleClose = useCallback(() => {
-    // Si la Fullscreen API está activa en el navegador, salir limpiamente
     if (
       document.fullscreenElement ||
       (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement
@@ -60,32 +53,26 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
     onClose();
   }, [onClose]);
 
-  // Manejar tecla Escape y Fullscreen API
   useEffect(() => {
-    // Guardar la posición exacta de scroll antes de abrir
     scrollPositionRef.current = window.scrollY;
 
-    // Bloquear el scroll del documento
     const originalBodyOverflow = document.body.style.overflow;
     const originalHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
 
-    // Intentar solicitar Fullscreen real en el navegador
     const el = containerRef.current;
     if (el) {
       try {
         if (el.requestFullscreen) {
-          el.requestFullscreen().catch(() => {
-            // Silencioso si el navegador/política lo bloquea; el fallback visual fixed 100dvh se activa automáticamente
-          });
+          el.requestFullscreen().catch(() => {});
         } else if (
           (el as unknown as { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen
         ) {
           (el as unknown as { webkitRequestFullscreen: () => void }).webkitRequestFullscreen();
         }
       } catch {
-        // Fallback visual activo
+        // Fallback visual fixed 100dvh activo
       }
     }
 
@@ -96,30 +83,27 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
       }
     };
 
-    // Sincronizar si el usuario sale de fullscreen con gestos del navegador
-    const handleFullscreenChange = () => {
-      const isFullscreen =
-        !!document.fullscreenElement ||
-        !!(document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement;
-      if (!isFullscreen && containerRef.current) {
-        // El usuario salió de fullscreen nativo
-      }
-    };
-
     window.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
 
-      // Restaurar scroll de body y html
+      if (
+        document.fullscreenElement ||
+        (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      ) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (
+          (document as unknown as { webkitExitFullscreen?: () => void }).webkitExitFullscreen
+        ) {
+          (document as unknown as { webkitExitFullscreen: () => void }).webkitExitFullscreen();
+        }
+      }
+
       document.body.style.overflow = originalBodyOverflow;
       document.documentElement.style.overflow = originalHtmlOverflow;
 
-      // Devolver exactamente al punto donde estaba el usuario
       window.scrollTo({
         top: scrollPositionRef.current,
         behavior: 'instant' as ScrollBehavior,
@@ -127,9 +111,10 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
     };
   }, [handleClose]);
 
-  return (
+  const modalContent = (
     <div
       ref={containerRef}
+      onClick={handleClose}
       className="fixed inset-0 w-screen h-[100dvh] bg-[#000000] z-[99999] flex items-center justify-center select-none overflow-hidden"
       style={{
         position: 'fixed',
@@ -144,22 +129,20 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
       }}
       role="dialog"
       aria-modal="true"
-      aria-label="Reproductor de vídeo en pantalla completa"
+      aria-label={label || 'Reproductor de vídeo en pantalla completa'}
     >
-      {/* 
-        BOTÓN DE CIERRE
-        - Esquina superior derecha
-        - Discreto, blanco, pequeño, visible
-        - Sin card ni fondo exagerado
-      */}
       <button
-        onClick={handleClose}
-        className="absolute top-4 sm:top-6 md:top-8 right-4 sm:right-6 md:right-8 z-50 text-white/70 hover:text-white p-2.5 transition-all duration-300 focus:outline-none hover:rotate-90 group cursor-pointer"
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleClose();
+        }}
+        className="fixed top-4 sm:top-6 md:top-8 right-4 sm:right-6 md:right-8 z-[100000] text-white/75 hover:text-white p-2.5 transition-all duration-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/60 hover:rotate-90 group cursor-pointer"
         aria-label="Cerrar vídeo"
         title="Cerrar (Esc)"
       >
         <svg
-          className="w-7 h-7 sm:w-8 sm:h-8 transition-transform group-hover:scale-110 drop-shadow-[0_2px_10px_rgba(0,0,0,0.8)]"
+          className="w-7 h-7 sm:w-8 sm:h-8 transition-transform group-hover:scale-110 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
@@ -170,13 +153,6 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
         </svg>
       </button>
 
-      {/* 
-        CONTENEDOR DEL VÍDEO
-        - Centrado absoluto horizontal y vertical
-        - Proporción 16:9 estricta
-        - Ajuste perfecto: ocupa el máximo ancho o alto del viewport sin rebasar
-        - Nunca se recorta en desktop ni en móvil (object-fit contain)
-      */}
       <div
         className="relative flex items-center justify-center bg-black overflow-hidden"
         style={{
@@ -189,15 +165,28 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <iframe
-          src={embedSrc}
-          className="w-full h-full border-0 bg-black"
-          allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+          src={vimeoEmbedSrc}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            border: 0,
+          }}
+          className="bg-black"
+          allow="autoplay; fullscreen; picture-in-picture"
           allowFullScreen
           title="Reproductor Vimeo Cineprood"
         />
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body);
+  }
+
+  return modalContent;
 };
 
 export default FullscreenVideoPlayer;

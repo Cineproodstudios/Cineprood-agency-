@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import HistoriaVideo from './components/HistoriaVideo';
 import Modos from './components/Modos';
 import CinematicBanner from './components/CinematicBanner';
+import TrabajoClientes from './components/TrabajoClientes';
 import Proyectos from './components/Proyectos';
 import Fotos from './components/Fotos';
 import RedesSociales from './components/RedesSociales';
@@ -16,6 +17,7 @@ const App: React.FC = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isVideoActive, setIsVideoActive] = useState(false);
+  const [isClientReelActive, setIsClientReelActive] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -37,12 +39,17 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-black text-black dark:text-white selection:bg-red-600 selection:text-white min-h-screen transition-colors duration-500">
-      <Navbar onToggleTheme={toggleTheme} isDarkMode={isDarkMode} isVideoActive={isVideoActive || !!selectedVideo} />
+      <Navbar
+        onToggleTheme={toggleTheme}
+        isDarkMode={isDarkMode}
+        isVideoActive={isVideoActive || isClientReelActive || !!selectedVideo}
+      />
       
       <main>
         <Hero />
         <HistoriaVideo onVideoActiveChange={setIsVideoActive} />
         <Modos />
+        <TrabajoClientes onVideoActiveChange={setIsClientReelActive} />
         <CinematicBanner onOpenVideo={setSelectedVideo} />
         <Proyectos onOpenVideo={setSelectedVideo} />
         
