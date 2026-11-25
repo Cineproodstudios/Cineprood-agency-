@@ -95,19 +95,13 @@ const Fotos: React.FC = () => {
       <section
         ref={mobileSectionRef}
         id="fotos"
-        className="bg-black text-white py-14 select-none overflow-x-clip"
+        className="bg-black text-white py-16 border-t border-white/10 select-none overflow-x-clip"
         aria-label="Galería de fotografía"
       >
-        <div className="px-5 mb-5 flex items-center justify-between">
-          <h2 className="text-[10px] font-mono tracking-[0.55em] uppercase text-white/45">
+        <div className="px-5 mb-6 max-w-md mx-auto">
+          <h2 className="text-3xl font-black tracking-tighter uppercase leading-none">
             FOTOS
           </h2>
-          <p className="text-[10px] font-mono tracking-[0.32em] uppercase text-white/65 tabular-nums">
-            <span className="text-red-600 font-bold">
-              {String(currentIndex + 1).padStart(2, '0')}
-            </span>{' '}
-            / {String(images.length).padStart(2, '0')}
-          </p>
         </div>
 
         <div
@@ -134,16 +128,13 @@ const Fotos: React.FC = () => {
           ))}
         </div>
 
-        <div className="px-5 mt-4 flex items-center gap-4">
-          <div className="flex-1 h-[1px] bg-white/15 overflow-hidden">
+        <div className="px-5 mt-4 max-w-md mx-auto">
+          <div className="h-[1px] bg-white/15 overflow-hidden">
             <div
               className="h-full bg-red-600 transition-all duration-300 ease-out"
               style={{ width: `${progressPct}%` }}
             />
           </div>
-          <span className="text-[9px] font-mono tracking-[0.28em] uppercase text-white/40 whitespace-nowrap">
-            Desliza →
-          </span>
         </div>
       </section>
     );

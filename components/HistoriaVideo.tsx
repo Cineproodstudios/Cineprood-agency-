@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Player from '@vimeo/player';
 import { useIsMobile } from '../utils/mobile';
+import MobileVideoCard from './MobileVideoCard';
 
 // Vimeo video ID & official cached poster frame
 const VIMEO_ID = 1227803563;
@@ -38,9 +39,9 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
   const holdRafIdRef = useRef<number | null>(null);
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize Vimeo Player (preloaded proactively while approaching on mobile, immediately on desktop)
+  // Initialize Vimeo Player (desktop only — mobile uses a direct visible iframe with native controls)
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (isMobile || !containerRef.current) return;
 
     const player = new Player(containerRef.current, {
       id: VIMEO_ID,
@@ -74,7 +75,7 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
       clearTimeout(fallbackTimer);
       player.destroy().catch(() => {});
     };
-  }, []);
+  }, [isMobile]);
 
   // Smooth scroll handler to next section when user clicks the "Seguir hacia abajo" indicator
   const handleScrollToNext = useCallback(() => {
@@ -304,6 +305,33 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
 
   // SVG stroke calculation for circular progress ring
   const strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - (isMobile ? 1 : holdProgress));
+
+  // Experiencia móvil (<= 768px): vídeo de presentación 16:9 directo y visible, sin textos ni bloqueo de scroll
+  if (isMobile) {
+    return (
+      <section
+        ref={sectionRef}
+        id="historia"
+        className="relative w-full py-6 px-4 bg-black z-10 select-none"
+        aria-label="Presentación Cineprood"
+      >
+        <span id="origen" className="absolute top-0 opacity-0 pointer-events-none" />
+        <div className="max-w-md mx-auto">
+          <MobileVideoCard
+            platform="vimeo"
+            videoId={String(VIMEO_ID)}
+            aspectRatio="16:9"
+            posterUrl={VIMEO_POSTER_URL}
+            title="Presentación Cineprood"
+            isPlaying={true}
+            onPlay={() => {}}
+            autoEmbed={true}
+            ambientLoop={true}
+          />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section 

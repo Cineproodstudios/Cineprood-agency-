@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
         </a>
       </div>
 
-      <div className="order-4">
+      <div className="hidden md:block order-4">
         MADE WITH OBSESSION
       </div>
     </footer>

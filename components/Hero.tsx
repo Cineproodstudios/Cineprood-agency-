@@ -36,7 +36,7 @@ const Hero: React.FC = () => {
           </h1>
           
           <div className={`w-full flex flex-col items-center transition-all duration-500 md:duration-1000 md:delay-500 ease-out ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 md:translate-y-10'}`}>
-            <p className="mt-5 md:mt-8 text-sm md:text-base max-w-xs sm:max-w-sm opacity-65 md:opacity-60 font-light leading-relaxed px-2">
+            <p className="hidden md:block mt-5 md:mt-8 text-sm md:text-base max-w-xs sm:max-w-sm opacity-65 md:opacity-60 font-light leading-relaxed px-2">
               Productora híbrida a tu alcance.
             </p>
 

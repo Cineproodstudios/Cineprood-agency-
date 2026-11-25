@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import Reveal from './Reveal';
 import VimeoPlayer from './VimeoPlayer';
 import { resolveVimeoThumbnail } from '../data/clientWork';
-import { preloadImageUrl, warmPreconnect } from '../utils/mobile';
+import { preloadImageUrl, warmPreconnect, useIsMobile } from '../utils/mobile';
+import MobileVideoCard from './MobileVideoCard';
 
 interface Proyecto {
   id: string;
@@ -616,6 +617,8 @@ const humoImages = [
 ];
 
 const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVideo }) => {
+  const isMobile = useIsMobile();
+  const [activeMobileVideoId, setActiveMobileVideoId] = useState<string | null>(null);
   const [view, setView] = useState<'portfolio' | 'shorts'>('portfolio');
   const [activePreview, setActivePreview] = useState<ActivePortfolioPreview | null>(null);
   const [isPreviewClosing, setIsPreviewClosing] = useState(false);
@@ -795,7 +798,120 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
       window.removeEventListener('resize', updateHeight);
       if (resizeObserver) resizeObserver.disconnect();
     };
-  }, [view]);
+  }, [view, isMobile]);
+
+  if (isMobile) {
+    return (
+      <section
+        ref={sectionRef}
+        id="proyectos"
+        className="py-16 px-5 bg-black text-white border-t border-white/10"
+        aria-label="Portfolio"
+      >
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-between gap-4 mb-10">
+            <h2 className="text-3xl font-black tracking-tighter uppercase leading-none">
+              {view === 'portfolio' ? 'PORTFOLIO' : 'CORTOMETRAJES'}
+            </h2>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveMobileVideoId(null);
+                setView(view === 'portfolio' ? 'shorts' : 'portfolio');
+              }}
+              className="min-h-[44px] px-3.5 border border-red-600/40 text-[10px] font-mono tracking-[0.22em] uppercase text-white bg-red-600/10 cursor-pointer whitespace-nowrap"
+            >
+              {view === 'portfolio' ? 'Cortometrajes →' : '← Volver'}
+            </button>
+          </div>
+
+          {view === 'portfolio' ? (
+            <div className="space-y-11">
+              {proyectos.map((p) => (
+                <article key={p.id} className="space-y-3">
+                  <MobileVideoCard
+                    platform="vimeo"
+                    videoId={p.vimeoId}
+                    vimeoHash={p.vimeoHash}
+                    aspectRatio="16:9"
+                    posterUrl={p.image}
+                    title={p.title}
+                    isPlaying={activeMobileVideoId === p.id}
+                    onPlay={() => setActiveMobileVideoId(p.id)}
+                  />
+                  <h3 className="text-base font-bold tracking-tight uppercase leading-snug text-white">
+                    {p.title}
+                  </h3>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-12">
+              <div className="space-y-4">
+                <h3 className="text-2xl font-black tracking-tighter uppercase">Accidentados</h3>
+                <div className="space-y-3">
+                  {accidentadosImages.map((src, i) => (
+                    <div key={`acc-m-${i}`} className="aspect-video w-full overflow-hidden bg-[#070707]">
+                      <img
+                        src={src}
+                        alt={`Accidentados ${i + 1}`}
+                        width={1280}
+                        height={720}
+                        loading="lazy"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover block"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-2xl font-black tracking-tighter uppercase">Murmullo de los grillos</h3>
+                <div className="space-y-3">
+                  {murmulloImages.map((src, i) => (
+                    <div key={`mur-m-${i}`} className="aspect-video w-full overflow-hidden bg-[#070707]">
+                      <img
+                        src={src}
+                        alt={`Murmullo de los grillos ${i + 1}`}
+                        width={1280}
+                        height={720}
+                        loading="lazy"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover block"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-2xl font-black tracking-tighter uppercase">Humo</h3>
+                <div className="space-y-3">
+                  {humoImages.map((src, i) => (
+                    <div key={`humo-m-${i}`} className="aspect-video w-full overflow-hidden bg-[#070707]">
+                      <img
+                        src={src}
+                        alt={`Humo ${i + 1}`}
+                        width={1280}
+                        height={720}
+                        loading="lazy"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover block"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

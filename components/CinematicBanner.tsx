@@ -1,11 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import { preloadImageUrl, warmPreconnect } from '../utils/mobile';
+import React, { useEffect, useRef, useState } from 'react';
+import { preloadImageUrl, warmPreconnect, useIsMobile } from '../utils/mobile';
+import MobileVideoCard from './MobileVideoCard';
 
 interface CinematicBannerProps {
   onOpenVideo: (url: string) => void;
 }
 
 const CinematicBanner: React.FC<CinematicBannerProps> = ({ onOpenVideo }) => {
+  const isMobile = useIsMobile();
+  const [isPlayingMobile, setIsPlayingMobile] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const videoUrl = 'https://player.vimeo.com/video/1230682471';
   const posterImage =
@@ -29,6 +32,37 @@ const CinematicBanner: React.FC<CinematicBannerProps> = ({ onOpenVideo }) => {
     observer.observe(el);
     return () => observer.disconnect();
   }, [posterImage]);
+
+  if (isMobile) {
+    return (
+      <section
+        ref={sectionRef}
+        id="cinematic-banner"
+        className="w-full py-16 px-5 bg-black text-white border-t border-white/10 select-none"
+        aria-label="Manifiesta — Cortometraje"
+      >
+        <div className="max-w-md mx-auto">
+          <h2 className="text-3xl font-black tracking-tighter uppercase leading-none mb-7">
+            CORTOMETRAJES
+          </h2>
+          <div className="space-y-3.5">
+            <MobileVideoCard
+              platform="vimeo"
+              videoId="1230682471"
+              aspectRatio="16:9"
+              posterUrl={posterImage}
+              title="MANIFIESTA"
+              isPlaying={isPlayingMobile}
+              onPlay={() => setIsPlayingMobile(true)}
+            />
+            <h3 className="font-cinematic text-xl tracking-[0.22em] uppercase text-white leading-none pt-1">
+              MANIFIESTA
+            </h3>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

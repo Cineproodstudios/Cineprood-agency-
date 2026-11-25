@@ -11,13 +11,16 @@ import {
   ClientSocialPost,
   ClientSocialProfile,
   getClientPrimaryThumbnail,
+  getPostInitialThumbnail,
   formatPublicationCount,
 } from '../data/clientWork';
 import {
+  useIsMobile,
   getIsMobileViewport,
   preloadImageUrl,
   prefetchClientResources,
 } from '../utils/mobile';
+import MobileVideoCard from './MobileVideoCard';
 
 const PREVIEW_CLOSE_TOLERANCE_MS = 150;
 
@@ -159,6 +162,8 @@ export const ClientSocialHub: React.FC<ClientSocialHubProps> = ({
   const closeUnmountTimerRef = useRef<number | null>(null);
   const isPreviewClosingRef = useRef(false);
 
+  const isMobile = useIsMobile();
+  const [activeMobileVideoId, setActiveMobileVideoId] = useState<string | null>(null);
   const [selectedClient, setSelectedClient] = useState<ClientSocialProfile | null>(null);
   const [activePreview, setActivePreview] = useState<ActiveFloatingPreview | null>(null);
   const activePreviewRef = useRef<ActiveFloatingPreview | null>(null);
@@ -365,6 +370,142 @@ export const ClientSocialHub: React.FC<ClientSocialHubProps> = ({
       }
     }, delayMs);
   };
+
+  // EXPERIENCIA MÓVIL (<= 768px):
+  // TRABAJO PARA CLIENTES → CARPETAS (portada + logo transparente + nombre) → CARPETA DEL CLIENTE (← VOLVER + título + sus vídeos)
+  if (isMobile) {
+    return (
+      <section
+        ref={sectionRef}
+        id="trabajo-clientes"
+        className="py-16 px-5 bg-black text-white border-t border-white/10"
+        aria-label="Trabajo para clientes"
+      >
+        <div
+          className={`max-w-md mx-auto transition-opacity duration-200 ${
+            isTransitioning ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          {!selectedClient ? (
+            <div>
+              <h2 className="text-3xl font-black tracking-tighter uppercase leading-none mb-8">
+                TRABAJO PARA CLIENTES
+              </h2>
+
+              <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3.5">
+                {clients.map((client) => {
+                  const primaryThumb = getClientPrimaryThumbnail(client);
+                  const logoSizeClass =
+                    client.logoSizeClass ?? 'w-[68%] max-w-[200px] max-h-[54%]';
+
+                  return (
+                    <button
+                      key={client.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveMobileVideoId(null);
+                        transitionToClient(client);
+                      }}
+                      aria-label={`Abrir carpeta de ${client.name}`}
+                      className="client-card relative block w-full text-left aspect-[9/16] overflow-hidden rounded-[3px] bg-[#070707] border border-white/10 active:scale-[0.985] transition-transform duration-150 cursor-pointer select-none focus:outline-none focus-visible:ring-1 focus-visible:ring-red-600"
+                    >
+                      {primaryThumb ? (
+                        <img
+                          src={primaryThumb}
+                          alt={client.name}
+                          width={720}
+                          height={1280}
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                          decoding="async"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          aria-hidden="true"
+                          className="absolute inset-0 bg-[#070707]"
+                        />
+                      )}
+
+                      <div
+                        aria-hidden="true"
+                        className="client-overlay absolute inset-0 pointer-events-none"
+                      />
+                      <div
+                        aria-hidden="true"
+                        className="client-meta-scrim absolute inset-0 pointer-events-none"
+                      />
+
+                      {/* Logo transparente centrado sobre la portada */}
+                      <div className="absolute inset-0 z-10 flex items-center justify-center px-4 pb-12 pointer-events-none">
+                        {client.logo ? (
+                          <img
+                            src={client.logo}
+                            alt={`Logo de ${client.name}`}
+                            referrerPolicy="no-referrer"
+                            loading="lazy"
+                            decoding="async"
+                            className={`client-logo h-auto object-contain bg-transparent ${logoSizeClass}`}
+                          />
+                        ) : (
+                          <span className="text-3xl font-black tracking-[0.14em] uppercase text-white/90">
+                            {client.initials}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Solo el nombre del cliente abajo (sin contadores ni descripciones) */}
+                      <div className="absolute inset-x-0 bottom-0 p-3.5 z-20 pointer-events-none">
+                        <h3 className="text-sm font-black tracking-tight uppercase text-white leading-[1.1] text-balance break-words drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)]">
+                          {client.name}
+                        </h3>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="mb-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMobileVideoId(null);
+                    transitionToClient(null);
+                  }}
+                  className="inline-flex items-center gap-2.5 min-h-[48px] px-2 -ml-2 text-xs font-mono tracking-[0.26em] uppercase text-white/80 active:text-red-500 cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-red-600"
+                >
+                  <span aria-hidden="true">←</span>
+                  <span>VOLVER</span>
+                </button>
+              </div>
+
+              <h2 className="text-3xl font-black tracking-tighter uppercase leading-none text-white mb-7">
+                {selectedClient.name}
+              </h2>
+
+              <div className="space-y-5">
+                {selectedClient.posts.map((post, idx) => (
+                  <MobileVideoCard
+                    key={post.id}
+                    platform={post.platform}
+                    videoId={post.videoId}
+                    vimeoHash={post.vimeoHash}
+                    aspectRatio={post.aspectRatio ?? '9:16'}
+                    posterUrl={getPostInitialThumbnail(post)}
+                    title={`${selectedClient.name} ${idx + 1}`}
+                    isPlaying={activeMobileVideoId === post.id}
+                    onPlay={() => setActiveMobileVideoId(post.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section

@@ -59,52 +59,27 @@ const Modos: React.FC = () => {
     };
   }, [isMobile]);
 
-  // Experiencia vertical editorial exclusiva para móvil (sin bloqueos 400vh ni re-renders por píxel)
+  // Experiencia vertical minimalista exclusiva para móvil: solo títulos, cero párrafos
   if (isMobile) {
     return (
       <section
         id="modos"
-        className="py-16 px-5 bg-white dark:bg-black text-black dark:text-white transition-colors duration-500"
+        className="py-10 px-5 bg-black text-white"
       >
-        <div className="max-w-xl mx-auto">
-          <Reveal>
-            <p className="text-[10px] font-mono tracking-[0.45em] uppercase opacity-45 mb-8">
-              Modos de producción
-            </p>
-          </Reveal>
-
-          <div className="divide-y divide-black/10 dark:divide-white/10">
-            {panels.map((p, i) => (
-              <Reveal key={p.num} delay={i * 40} className="py-8">
-                <div className="flex items-baseline justify-between gap-4">
-                  <span className="text-xs font-mono tracking-[0.28em] text-red-600 font-bold tabular-nums">
-                    {p.num}
-                  </span>
-                  <div className="h-[1px] flex-1 bg-black/10 dark:bg-white/10" aria-hidden="true" />
-                </div>
-
-                <h3
-                  className="mt-3 font-black tracking-tighter uppercase leading-[0.95] text-balance"
-                  style={{ fontSize: 'clamp(2rem, 10vw, 3.25rem)' }}
-                >
-                  {p.title}
-                </h3>
-
-                <p className="mt-3 text-sm font-light uppercase tracking-[0.14em] text-red-600/90 leading-relaxed">
-                  {p.desc}
-                </p>
-              </Reveal>
-            ))}
-          </div>
-
-          <Reveal delay={60} className="pt-10 text-center">
-            <h3
-              className="font-black uppercase leading-tight tracking-tighter text-balance"
-              style={{ fontSize: 'clamp(1.35rem, 6.2vw, 2rem)' }}
-            >
-              ESCOGE EL MÁS ADECUADO PARA TU PRESUPUESTO.
-            </h3>
-          </Reveal>
+        <div className="max-w-md mx-auto divide-y divide-white/10">
+          {panels.map((p) => (
+            <div key={p.num} className="py-5 flex items-baseline gap-4">
+              <span className="text-xs font-mono tracking-[0.22em] text-red-600 font-bold tabular-nums shrink-0">
+                {p.num}
+              </span>
+              <h3
+                className="font-black tracking-tighter uppercase leading-none"
+                style={{ fontSize: 'clamp(1.75rem, 9vw, 2.75rem)' }}
+              >
+                {p.title}
+              </h3>
+            </div>
+          ))}
         </div>
       </section>
     );

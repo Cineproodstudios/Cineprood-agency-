@@ -168,15 +168,18 @@ export const SocialVideoModal: React.FC<SocialVideoModalProps> = ({
                     : 'min(92vw, 1040px, calc(76dvh * 16 / 9))',
                   maxHeight: isMobile ? '68dvh' : '76dvh',
                 }
-              : {
-                  height: isMobile
-                    ? hasMultiple
-                      ? 'min(64dvh, 620px)'
-                      : 'min(72dvh, 680px)'
-                    : 'min(76dvh, 720px)',
-                  maxWidth: 'min(92vw, 420px)',
-                  width: 'auto',
-                }
+              : isMobile
+                ? {
+                    width: hasMultiple
+                      ? 'min(92vw, 420px, calc(64dvh * 9 / 16))'
+                      : 'min(92vw, 420px, calc(72dvh * 9 / 16))',
+                    maxHeight: hasMultiple ? '64dvh' : '72dvh',
+                  }
+                : {
+                    height: 'min(76dvh, 720px)',
+                    maxWidth: 'min(92vw, 420px)',
+                    width: 'auto',
+                  }
           }
         >
           {currentPost.platform === 'vimeo' ? (

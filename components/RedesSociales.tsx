@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
-import { warmPreconnect } from '../utils/mobile';
+import { warmPreconnect, useIsMobile } from '../utils/mobile';
 
 declare global {
   interface Window {
@@ -13,12 +13,14 @@ declare global {
 }
 
 export const RedesSociales: React.FC = () => {
+  const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLElement>(null);
   const [shouldLoadEmbeds, setShouldLoadEmbeds] = useState(false);
   const [isTikTokLoaded, setIsTikTokLoaded] = useState(false);
   const [isInstagramLoading, setIsInstagramLoading] = useState(true);
 
   useEffect(() => {
+    if (isMobile) return;
     const el = sectionRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') {
       setShouldLoadEmbeds(true);
@@ -39,10 +41,10 @@ export const RedesSociales: React.FC = () => {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
-    if (!shouldLoadEmbeds) return;
+    if (isMobile || !shouldLoadEmbeds) return;
 
     // 1. TikTok Script handling
     const tiktokScriptId = 'tiktok-embed-script';
@@ -124,7 +126,46 @@ export const RedesSociales: React.FC = () => {
         };
       }
     }
-  }, [shouldLoadEmbeds]);
+  }, [shouldLoadEmbeds, isMobile]);
+
+  if (isMobile) {
+    return (
+      <section
+        ref={sectionRef}
+        id="redes"
+        className="py-12 px-5 bg-black text-white border-t border-white/10"
+        aria-label="Redes sociales"
+      >
+        <div className="max-w-md mx-auto space-y-6">
+          <h2 className="text-3xl font-black tracking-tighter uppercase leading-none">
+            REDES
+          </h2>
+
+          <div className="grid grid-cols-2 gap-3">
+            <a
+              href="https://www.tiktok.com/@cineprood"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-[52px] px-4 py-3.5 rounded-[4px] bg-red-600 text-white text-xs font-black uppercase tracking-[0.22em] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            >
+              <span>TIKTOK</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+
+            <a
+              href="https://www.instagram.com/cineprood/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-[52px] px-4 py-3.5 rounded-[4px] border border-white/25 bg-white/5 text-white text-xs font-black uppercase tracking-[0.22em] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            >
+              <span>INSTAGRAM</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section 
