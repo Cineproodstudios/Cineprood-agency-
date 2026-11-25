@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Reveal from './Reveal';
+import { warmPreconnect } from '../utils/mobile';
 
 declare global {
   interface Window {
@@ -12,10 +13,37 @@ declare global {
 }
 
 export const RedesSociales: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [shouldLoadEmbeds, setShouldLoadEmbeds] = useState(false);
   const [isTikTokLoaded, setIsTikTokLoaded] = useState(false);
   const [isInstagramLoading, setIsInstagramLoading] = useState(true);
 
   useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setShouldLoadEmbeds(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          warmPreconnect('https://www.tiktok.com');
+          warmPreconnect('https://www.instagram.com');
+          setShouldLoadEmbeds(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLoadEmbeds) return;
+
     // 1. TikTok Script handling
     const tiktokScriptId = 'tiktok-embed-script';
     let tiktokScript = document.getElementById(tiktokScriptId) as HTMLScriptElement | null;
@@ -96,47 +124,48 @@ export const RedesSociales: React.FC = () => {
         };
       }
     }
-  }, []);
+  }, [shouldLoadEmbeds]);
 
   return (
     <section 
+      ref={sectionRef}
       id="redes" 
-      className="py-24 md:py-36 bg-black text-white relative overflow-hidden border-t border-b border-white/10"
+      className="py-14 md:py-36 bg-black text-white relative overflow-hidden border-t border-b border-white/10"
     >
       {/* Subtle cinematic ambient glow in corporate red & black */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-950/20 via-black to-black pointer-events-none"></div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 text-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 md:px-12 text-center">
         {/* Main Section Header */}
         <Reveal>
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-red-600/30 bg-red-600/10 mb-6">
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-[10px] font-mono tracking-[0.4em] uppercase text-white font-medium">
+          <div className="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full border border-red-600/30 bg-red-600/10 mb-5 md:mb-6 max-w-full">
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse shrink-0"></span>
+            <span className="text-[9px] sm:text-[10px] font-mono tracking-[0.22em] sm:tracking-[0.4em] uppercase text-white font-medium">
               COMUNIDAD & PROCESOS CREATIVOS
             </span>
           </div>
 
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-none mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-none mb-5 md:mb-6">
             SÍGUENOS EN <span className="text-red-600 relative inline-block">
               NUESTRAS REDES
               <span className="absolute bottom-0 left-0 w-full h-[3px] bg-red-600 rounded-full shadow-[0_0_12px_rgba(220,38,38,0.8)]"></span>
             </span>
           </h2>
 
-          <p className="text-sm md:text-base max-w-2xl mx-auto text-white/70 font-light leading-relaxed mb-16">
+          <p className="text-sm md:text-base max-w-2xl mx-auto text-white/70 font-light leading-relaxed mb-10 md:mb-16">
             Descubre nuestros proyectos audiovisuales, procesos creativos, breakdowns y contenido generado con inteligencia artificial en TikTok e Instagram.
           </p>
         </Reveal>
 
         {/* Dual Grid: TikTok & Instagram */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 max-w-6xl mx-auto items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-10 max-w-6xl mx-auto items-stretch">
           
           {/* TIKTOK CARD */}
           <Reveal delay={100} className="w-full flex flex-col">
-            <div className="h-full flex flex-col justify-between rounded-2xl bg-white/5 border border-white/10 p-4 md:p-8 shadow-2xl relative backdrop-blur-sm">
+            <div className="h-full flex flex-col justify-between rounded-2xl bg-white/5 border border-white/10 p-4 md:p-8 shadow-2xl relative md:backdrop-blur-sm">
               <div>
                 {/* Platform Header */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4 mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-red-600/20 border border-red-600/40 flex items-center justify-center text-red-500">
                       <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -166,11 +195,11 @@ export const RedesSociales: React.FC = () => {
                 {/* TikTok Embed Widget */}
                 <div className="w-full flex justify-center overflow-x-hidden my-2">
                   <blockquote
-                    className="tiktok-embed"
+                    className="tiktok-embed mobile-embed-box"
                     cite="https://www.tiktok.com/@cineprood"
                     data-unique-id="cineprood"
                     data-embed-type="creator"
-                    style={{ maxWidth: '720px', minWidth: '280px', width: '100%', margin: '0 auto' }}
+                    style={{ maxWidth: '720px', minWidth: 'min(280px, 100%)', width: '100%', margin: '0 auto' }}
                   >
                     <section>
                       <a
@@ -187,15 +216,15 @@ export const RedesSociales: React.FC = () => {
               </div>
 
               {/* TikTok Direct Action Button */}
-              <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="mt-6 md:mt-8 pt-6 border-t border-white/10">
                 <a
                   href="https://www.tiktok.com/@cineprood"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-[0.25em] rounded-lg shadow-lg shadow-red-600/20 hover:shadow-red-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                  className="w-full min-h-[48px] inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.25em] rounded-lg shadow-lg shadow-red-600/20 hover:shadow-red-600/40 md:hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
                 >
                   <span>VER PERFIL EN TIKTOK</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H18m0 0v5.5M18 6l-7.5 7.5M6 18h12" />
                   </svg>
                 </a>
@@ -205,10 +234,10 @@ export const RedesSociales: React.FC = () => {
 
           {/* INSTAGRAM CARD */}
           <Reveal delay={200} className="w-full flex flex-col">
-            <div className="h-full flex flex-col justify-between rounded-2xl bg-white/5 border border-white/10 p-4 md:p-8 shadow-2xl relative backdrop-blur-sm">
+            <div className="h-full flex flex-col justify-between rounded-2xl bg-white/5 border border-white/10 p-4 md:p-8 shadow-2xl relative md:backdrop-blur-sm">
               <div>
                 {/* Platform Header */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-6">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-4 mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-red-600/20 border border-red-600/40 flex items-center justify-center text-red-500">
                       <svg className="w-4 h-4 fill-none stroke-current" strokeWidth="2" viewBox="0 0 24 24">
@@ -240,7 +269,7 @@ export const RedesSociales: React.FC = () => {
                 {/* Instagram Embed Widget */}
                 <div className="w-full flex justify-center overflow-x-hidden my-2">
                   <blockquote
-                    className="instagram-media"
+                    className="instagram-media mobile-embed-box"
                     data-instgrm-permalink="https://www.instagram.com/cineprood/"
                     data-instgrm-version="14"
                     style={{
@@ -249,7 +278,7 @@ export const RedesSociales: React.FC = () => {
                       borderRadius: '12px',
                       margin: '0 auto',
                       maxWidth: '658px',
-                      minWidth: '280px',
+                      minWidth: 'min(280px, 100%)',
                       width: '100%'
                     }}
                   >
@@ -271,15 +300,15 @@ export const RedesSociales: React.FC = () => {
               </div>
 
               {/* Instagram Direct Action Button */}
-              <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="mt-6 md:mt-8 pt-6 border-t border-white/10">
                 <a
                   href="https://www.instagram.com/cineprood/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-[0.25em] rounded-lg shadow-lg shadow-red-600/20 hover:shadow-red-600/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                  className="w-full min-h-[48px] inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-[0.2em] sm:tracking-[0.25em] rounded-lg shadow-lg shadow-red-600/20 hover:shadow-red-600/40 md:hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
                 >
                   <span>VER PERFIL EN INSTAGRAM</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H18m0 0v5.5M18 6l-7.5 7.5M6 18h12" />
                   </svg>
                 </a>

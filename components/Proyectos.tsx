@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import Reveal from './Reveal';
 import VimeoPlayer from './VimeoPlayer';
 import { resolveVimeoThumbnail } from '../data/clientWork';
+import { preloadImageUrl, warmPreconnect } from '../utils/mobile';
 
 interface Proyecto {
   id: string;
@@ -441,6 +442,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (!supportsDesktopHover()) return;
     if (e.currentTarget.matches(':focus-visible')) {
       schedulePreviewOpen('keyboard');
     }
@@ -490,15 +492,18 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({
           ref={mediaBoxRef}
           onPointerEnter={handlePointerEnter}
           onPointerLeave={handlePointerLeave}
-          className="relative aspect-video rounded-xl bg-black/5 dark:bg-[#080808] border border-black/5 dark:border-white/10 overflow-hidden mb-8 transition-all duration-300 ease-out group-hover:border-red-600/50"
+          className="relative aspect-video rounded-xl bg-black/5 dark:bg-[#080808] border border-black/5 dark:border-white/10 overflow-hidden mb-4 md:mb-8 transition-all duration-300 ease-out md:group-hover:border-red-600/50"
         >
           {posterUrl ? (
             <img
               src={posterUrl}
               alt={proyecto.title}
+              width={1280}
+              height={720}
               loading="lazy"
+              decoding="async"
               onError={handlePosterError}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out md:group-hover:scale-[1.03]"
               referrerPolicy="no-referrer"
             />
           ) : (
@@ -507,22 +512,22 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 dark:from-black/75 to-transparent opacity-65 pointer-events-none" />
 
-          <div className="absolute inset-0 flex items-center justify-center translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20 pointer-events-none">
+          <div className="hidden md:flex absolute inset-0 items-center justify-center translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20 pointer-events-none">
             <div className="bg-red-600 text-white px-7 py-2.5 rounded-sm text-[10px] font-black uppercase tracking-[0.4em] shadow-lg shadow-red-600/20 whitespace-nowrap">
               VER PROYECTO
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2 border-l border-transparent group-hover:border-red-600 pl-0 group-hover:pl-6 transition-all duration-300 ease-out">
+        <div className="flex flex-col gap-2 border-l border-transparent md:group-hover:border-red-600 pl-0 md:group-hover:pl-6 transition-all duration-300 ease-out">
           <div className="flex justify-between items-start">
-            <h4 className="text-xl md:text-2xl font-bold tracking-tight uppercase group-hover:text-red-600 transition-colors duration-300">
+            <h4 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight uppercase md:group-hover:text-red-600 transition-colors duration-300">
               {proyecto.title}
             </h4>
           </div>
 
           <div className="h-[2px] bg-black/10 dark:bg-white/10 w-full relative mt-2 overflow-hidden">
-            <div className="absolute inset-0 bg-red-600 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out" />
+            <div className="absolute inset-0 bg-red-600 -translate-x-full md:group-hover:translate-x-0 transition-transform duration-500 ease-out" />
           </div>
         </div>
       </div>
@@ -621,6 +626,7 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
   const closeDelayTimerRef = useRef<number | null>(null);
   const closeUnmountTimerRef = useRef<number | null>(null);
 
+  const sectionRef = useRef<HTMLElement>(null);
   const portfolioRef = React.useRef<HTMLDivElement>(null);
   const shortsRef = React.useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number | string>('auto');
@@ -745,6 +751,27 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
     };
   }, [activePreview, handleImmediateClose, handleScheduleClose]);
 
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          proyectos.forEach((p) => {
+            if (p.image) preloadImageUrl(p.image);
+          });
+          warmPreconnect('https://player.vimeo.com');
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   React.useEffect(() => {
     const updateHeight = () => {
       if (view === 'portfolio' && portfolioRef.current) {
@@ -756,11 +783,23 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
 
     updateHeight();
     window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
+
+    const activeTarget = view === 'portfolio' ? portfolioRef.current : shortsRef.current;
+    let resizeObserver: ResizeObserver | null = null;
+    if (activeTarget && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(updateHeight);
+      resizeObserver.observe(activeTarget);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
   }, [view]);
 
   return (
     <section
+      ref={sectionRef}
       id="proyectos"
       className="bg-white dark:bg-black transition-all duration-1000 ease-expo overflow-hidden"
       style={{ height }}
@@ -770,18 +809,19 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
         style={{ transform: `translateX(${view === 'portfolio' ? '0%' : '-50%'})` }}
       >
         {/* VIEW 1: PORTFOLIO */}
-        <div ref={portfolioRef} className="w-1/2 py-24 md:py-32 px-8 md:px-24">
+        <div ref={portfolioRef} className="w-1/2 py-14 md:py-32 px-5 md:px-24">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-end mb-32">
+            <div className="flex flex-wrap justify-between items-center md:items-end gap-4 mb-10 md:mb-32">
               <Reveal>
-                <p className="text-[10px] md:text-xs font-mono tracking-[0.8em] uppercase opacity-30 mb-4 select-none">
+                <p className="text-[10px] md:text-xs font-mono tracking-[0.55em] md:tracking-[0.8em] uppercase opacity-30 mb-0 md:mb-4 select-none">
                   Portafolio
                 </p>
               </Reveal>
               <Reveal delay={200}>
                 <button
+                  type="button"
                   onClick={() => setView('shorts')}
-                  className="group flex items-center gap-4 px-6 py-3 border border-red-600/30 hover:border-red-600 text-[10px] font-mono tracking-[0.4em] uppercase transition-all duration-500 bg-red-600/5 hover:bg-red-600 hover:text-white"
+                  className="group flex items-center gap-3 md:gap-4 min-h-[44px] px-4 md:px-6 py-2.5 md:py-3 border border-red-600/30 hover:border-red-600 text-[10px] font-mono tracking-[0.3em] md:tracking-[0.4em] uppercase transition-all duration-500 bg-red-600/5 hover:bg-red-600 hover:text-white cursor-pointer"
                 >
                   <span>Cortometrajes</span>
                   <svg
@@ -804,7 +844,7 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
               </Reveal>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-32">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 md:gap-y-32">
               {proyectos.map((p, i) => (
                 <PortfolioCard
                   key={p.id}
@@ -820,8 +860,8 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
               ))}
             </div>
 
-            <Reveal className="mt-40 text-center" delay={300}>
-              <p className="text-xs font-mono tracking-[0.4em] uppercase opacity-30 select-none">
+            <Reveal className="mt-14 md:mt-40 text-center" delay={300}>
+              <p className="text-xs font-mono tracking-[0.3em] md:tracking-[0.4em] uppercase opacity-30 select-none">
                 Nuevas piezas en producción constante.
               </p>
             </Reveal>
@@ -829,23 +869,24 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
         </div>
 
         {/* VIEW 2: SHORTS */}
-        <div ref={shortsRef} className="w-1/2 py-24 md:py-32 px-8 md:px-24">
+        <div ref={shortsRef} className="w-1/2 py-14 md:py-32 px-5 md:px-24">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-end mb-24">
+            <div className="flex flex-wrap justify-between items-end gap-4 mb-10 md:mb-24">
               <Reveal>
                 <div>
-                  <p className="text-[10px] md:text-xs font-mono tracking-[0.8em] uppercase opacity-30 mb-4 select-none">
+                  <p className="text-[10px] md:text-xs font-mono tracking-[0.55em] md:tracking-[0.8em] uppercase opacity-30 mb-3 md:mb-4 select-none">
                     Cortometrajes
                   </p>
-                  <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase">
+                  <h2 className="text-3xl sm:text-4xl md:text-7xl font-black tracking-tighter uppercase">
                     Accidentados
                   </h2>
                 </div>
               </Reveal>
               <Reveal delay={200}>
                 <button
+                  type="button"
                   onClick={() => setView('portfolio')}
-                  className="group flex items-center gap-4 px-6 py-3 border border-red-600/30 hover:border-red-600 text-[10px] font-mono tracking-[0.4em] uppercase transition-all duration-500 bg-red-600/5 hover:bg-red-600 hover:text-white"
+                  className="group flex items-center gap-3 md:gap-4 min-h-[44px] px-4 md:px-6 py-2.5 md:py-3 border border-red-600/30 hover:border-red-600 text-[10px] font-mono tracking-[0.3em] md:tracking-[0.4em] uppercase transition-all duration-500 bg-red-600/5 hover:bg-red-600 hover:text-white cursor-pointer"
                 >
                   <svg
                     width="12"
@@ -874,18 +915,21 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
                   key={`acc-${i}`}
                   delay={i * 100}
                   className={`relative overflow-hidden group ${
-                    i % 3 === 0 ? 'md:col-span-2 aspect-[21/9]' : 'aspect-video'
+                    i % 3 === 0 ? 'md:col-span-2 aspect-video md:aspect-[21/9]' : 'aspect-video'
                   }`}
                 >
                   <img
                     src={src}
                     alt={`Accidentados frame ${i + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.05]"
+                    width={1280}
+                    height={720}
+                    className="w-full h-full object-cover transition-transform duration-1000 ease-out md:group-hover:scale-[1.05]"
                     loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-4 left-4 text-[9px] font-mono text-white opacity-0 group-hover:opacity-60 transition-opacity duration-500 uppercase tracking-widest">
+                  <div className="absolute inset-0 bg-black/20 opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-4 left-4 text-[9px] font-mono text-white opacity-0 md:group-hover:opacity-60 transition-opacity duration-500 uppercase tracking-widest">
                     Frame 0{i + 1}
                   </div>
                 </Reveal>
@@ -893,8 +937,8 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
             </div>
 
             {/* MURMULLO DE LOS GRILLOS */}
-            <Reveal className="mt-48 mb-24">
-              <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase">
+            <Reveal className="mt-16 mb-8 md:mt-48 md:mb-24">
+              <h2 className="text-3xl sm:text-4xl md:text-7xl font-black tracking-tighter uppercase">
                 Murmullo de los grillos
               </h2>
             </Reveal>
@@ -905,18 +949,21 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
                   key={`mur-${i}`}
                   delay={i * 100}
                   className={`relative overflow-hidden group ${
-                    i % 3 === 0 ? 'md:col-span-2 aspect-[21/9]' : 'aspect-video'
+                    i % 3 === 0 ? 'md:col-span-2 aspect-video md:aspect-[21/9]' : 'aspect-video'
                   }`}
                 >
                   <img
                     src={src}
                     alt={`Murmullo frame ${i + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.05]"
+                    width={1280}
+                    height={720}
+                    className="w-full h-full object-cover transition-transform duration-1000 ease-out md:group-hover:scale-[1.05]"
                     loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-4 left-4 text-[9px] font-mono text-white opacity-0 group-hover:opacity-60 transition-opacity duration-500 uppercase tracking-widest">
+                  <div className="absolute inset-0 bg-black/20 opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-4 left-4 text-[9px] font-mono text-white opacity-0 md:group-hover:opacity-60 transition-opacity duration-500 uppercase tracking-widest">
                     Frame 0{i + 1}
                   </div>
                 </Reveal>
@@ -924,8 +971,8 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
             </div>
 
             {/* HUMO */}
-            <Reveal className="mt-48 mb-24">
-              <h2 className="text-4xl md:text-7xl font-black tracking-tighter uppercase">
+            <Reveal className="mt-16 mb-8 md:mt-48 md:mb-24">
+              <h2 className="text-3xl sm:text-4xl md:text-7xl font-black tracking-tighter uppercase">
                 Humo
               </h2>
             </Reveal>
@@ -936,18 +983,21 @@ const Proyectos: React.FC<{ onOpenVideo: (url: string) => void }> = ({ onOpenVid
                   key={`humo-${i}`}
                   delay={i * 100}
                   className={`relative overflow-hidden group ${
-                    i % 3 === 0 ? 'md:col-span-2 aspect-[21/9]' : 'aspect-video'
+                    i % 3 === 0 ? 'md:col-span-2 aspect-video md:aspect-[21/9]' : 'aspect-video'
                   }`}
                 >
                   <img
                     src={src}
                     alt={`Humo frame ${i + 1}`}
-                    className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.05]"
+                    width={1280}
+                    height={720}
+                    className="w-full h-full object-cover transition-transform duration-1000 ease-out md:group-hover:scale-[1.05]"
                     loading="lazy"
+                    decoding="async"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-4 left-4 text-[9px] font-mono text-white opacity-0 group-hover:opacity-60 transition-opacity duration-500 uppercase tracking-widest">
+                  <div className="absolute inset-0 bg-black/20 opacity-0 md:group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-4 left-4 text-[9px] font-mono text-white opacity-0 md:group-hover:opacity-60 transition-opacity duration-500 uppercase tracking-widest">
                     Frame 0{i + 1}
                   </div>
                 </Reveal>

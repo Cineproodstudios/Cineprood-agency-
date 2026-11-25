@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { getIsMobileViewport, useIsMobile } from '../utils/mobile';
 
 export interface FullscreenVideoPlayerProps {
   videoUrl: string;
@@ -30,12 +31,14 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef<number>(0);
+  const isMobile = useIsMobile();
 
   const { id: vimeoId, hash: vimeoHash } = extractVimeoParams(videoUrl);
   const hashParam = vimeoHash ? `&h=${encodeURIComponent(vimeoHash)}` : '';
+  const mobileInlineParam = isMobile ? '&playsinline=1' : '';
   const vimeoEmbedSrc = vimeoId.startsWith('http')
-    ? `${vimeoId}${vimeoId.includes('?') ? '&' : '?'}autoplay=1&title=0&byline=0&portrait=0${hashParam}`
-    : `https://player.vimeo.com/video/${encodeURIComponent(vimeoId)}?autoplay=1&title=0&byline=0&portrait=0${hashParam}`;
+    ? `${vimeoId}${vimeoId.includes('?') ? '&' : '?'}autoplay=1&title=0&byline=0&portrait=0${mobileInlineParam}${hashParam}`
+    : `https://player.vimeo.com/video/${encodeURIComponent(vimeoId)}?autoplay=1&title=0&byline=0&portrait=0${mobileInlineParam}${hashParam}`;
 
   const handleClose = useCallback(() => {
     if (
@@ -62,7 +65,7 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
     document.documentElement.style.overflow = 'hidden';
 
     const el = containerRef.current;
-    if (el) {
+    if (el && !getIsMobileViewport()) {
       try {
         if (el.requestFullscreen) {
           el.requestFullscreen().catch(() => {});
@@ -137,7 +140,15 @@ export const FullscreenVideoPlayer: React.FC<FullscreenVideoPlayerProps> = ({
           e.stopPropagation();
           handleClose();
         }}
-        className="fixed top-4 sm:top-6 md:top-8 right-4 sm:right-6 md:right-8 z-[100000] text-white/75 hover:text-white p-2.5 transition-all duration-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/60 hover:rotate-90 group cursor-pointer"
+        style={
+          isMobile
+            ? {
+                top: 'max(12px, env(safe-area-inset-top, 0px))',
+                right: 'max(12px, env(safe-area-inset-right, 0px))',
+              }
+            : undefined
+        }
+        className="fixed top-4 sm:top-6 md:top-8 right-4 sm:right-6 md:right-8 z-[100000] min-w-[48px] min-h-[48px] md:min-w-0 md:min-h-0 flex items-center justify-center text-white/85 md:text-white/75 hover:text-white p-2.5 transition-all duration-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/60 md:hover:rotate-90 group cursor-pointer"
         aria-label="Cerrar vídeo"
         title="Cerrar (Esc)"
       >

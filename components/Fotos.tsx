@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useIsMobile, preloadImageUrl } from '../utils/mobile';
 
 const images = [
   "https://i.postimg.cc/wvSB6RV5/DSC00426-copia.jpg",
@@ -16,8 +17,11 @@ const images = [
 
 const Fotos: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mobileSectionRef = useRef<HTMLElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -27,8 +31,28 @@ const Fotos: React.FC = () => {
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
+  // Preload primeras fotos en móvil antes de que la sección entre en pantalla
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (!isMobile) return;
+    const el = mobileSectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          images.slice(0, 4).forEach((src) => preloadImageUrl(src));
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (prefersReducedMotion || isMobile) return;
 
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -48,7 +72,82 @@ const Fotos: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, isMobile]);
+
+  // Experiencia móvil (<= 768px): galería táctil horizontal fluida sin trampa vertical de 1100vh
+  if (isMobile) {
+    const handleMobileStripScroll = () => {
+      const strip = stripRef.current;
+      if (!strip) return;
+      const firstCard = strip.firstElementChild as HTMLElement | null;
+      const step = firstCard ? firstCard.offsetWidth + 12 : Math.max(1, strip.clientWidth * 0.85);
+      const nextIdx = Math.max(0, Math.min(images.length - 1, Math.round(strip.scrollLeft / step)));
+      if (nextIdx !== currentIndex) {
+        setCurrentIndex(nextIdx);
+        if (images[nextIdx + 1]) preloadImageUrl(images[nextIdx + 1]);
+        if (images[nextIdx + 2]) preloadImageUrl(images[nextIdx + 2]);
+      }
+    };
+
+    const progressPct = ((currentIndex + 1) / images.length) * 100;
+
+    return (
+      <section
+        ref={mobileSectionRef}
+        id="fotos"
+        className="bg-black text-white py-14 select-none overflow-x-clip"
+        aria-label="Galería de fotografía"
+      >
+        <div className="px-5 mb-5 flex items-center justify-between">
+          <h2 className="text-[10px] font-mono tracking-[0.55em] uppercase text-white/45">
+            FOTOS
+          </h2>
+          <p className="text-[10px] font-mono tracking-[0.32em] uppercase text-white/65 tabular-nums">
+            <span className="text-red-600 font-bold">
+              {String(currentIndex + 1).padStart(2, '0')}
+            </span>{' '}
+            / {String(images.length).padStart(2, '0')}
+          </p>
+        </div>
+
+        <div
+          ref={stripRef}
+          onScroll={handleMobileStripScroll}
+          className="mobile-scroll-strip flex overflow-x-auto snap-x snap-mandatory gap-3 px-5 pb-2"
+        >
+          {images.map((src, i) => (
+            <figure
+              key={i}
+              className="w-[84vw] max-w-[360px] aspect-[4/5] shrink-0 snap-center bg-[#060606] border border-white/10 rounded-[2px] overflow-hidden flex items-center justify-center"
+            >
+              <img
+                src={src}
+                alt={`Foto ${i + 1}`}
+                width={960}
+                height={1200}
+                className="w-full h-full object-contain bg-black block"
+                loading={i < 2 ? 'eager' : 'lazy'}
+                decoding="async"
+                referrerPolicy="no-referrer"
+              />
+            </figure>
+          ))}
+        </div>
+
+        <div className="px-5 mt-4 flex items-center gap-4">
+          <div className="flex-1 h-[1px] bg-white/15 overflow-hidden">
+            <div
+              className="h-full bg-red-600 transition-all duration-300 ease-out"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <span className="text-[9px] font-mono tracking-[0.28em] uppercase text-white/40 whitespace-nowrap">
+            Desliza →
+          </span>
+        </div>
+      </section>
+    );
+  }
 
   if (prefersReducedMotion) {
     return (

@@ -148,7 +148,8 @@ export const SocialPost: React.FC<SocialPostProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLDivElement>) => {
-    // Accesibilidad: activar preview también al navegar con teclado (:focus-visible)
+    // Accesibilidad: activar preview solo en dispositivos con hover de escritorio (nunca en táctil)
+    if (!supportsDesktopHover()) return;
     if (e.currentTarget.matches(':focus-visible')) {
       triggerPreviewOpen('keyboard');
     }
@@ -199,8 +200,11 @@ export const SocialPost: React.FC<SocialPostProps> = ({
             <img
               src={resolvedThumb}
               alt={`${client.name} — Publicación ${pieceNumber}`}
+              width={isHorizontal ? 1280 : 720}
+              height={isHorizontal ? 720 : 1280}
               referrerPolicy="no-referrer"
               loading="lazy"
+              decoding="async"
               onError={() => setImgFailed(true)}
               className="w-full h-full object-cover"
             />
@@ -237,7 +241,7 @@ export const SocialPost: React.FC<SocialPostProps> = ({
 
           {/* Icono Play pequeño y centrado */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-white/30 bg-black/55 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-white/30 bg-black/60 md:bg-black/55 md:backdrop-blur-sm flex items-center justify-center">
               <svg
                 className="w-4 h-4 text-white translate-x-0.5 fill-current"
                 viewBox="0 0 24 24"

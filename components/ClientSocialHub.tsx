@@ -13,6 +13,11 @@ import {
   getClientPrimaryThumbnail,
   formatPublicationCount,
 } from '../data/clientWork';
+import {
+  getIsMobileViewport,
+  preloadImageUrl,
+  prefetchClientResources,
+} from '../utils/mobile';
 
 const PREVIEW_CLOSE_TOLERANCE_MS = 150;
 
@@ -49,8 +54,11 @@ const ClientProfileCard: React.FC<ClientProfileCardProps> = ({
           <img
             src={primaryThumb}
             alt={`Portada de ${client.name}`}
+            width={720}
+            height={1280}
             referrerPolicy="no-referrer"
             loading="lazy"
+            decoding="async"
             onError={() => setCoverFailed(true)}
             className="client-cover absolute inset-0 w-full h-full object-cover"
           />
@@ -99,6 +107,7 @@ const ClientProfileCard: React.FC<ClientProfileCardProps> = ({
               alt={`Logo de ${client.name}`}
               referrerPolicy="no-referrer"
               loading="lazy"
+              decoding="async"
               onError={() => setLogoFailed(true)}
               className={`client-logo h-auto object-contain bg-transparent ${logoSizeClass}`}
             />
@@ -265,6 +274,28 @@ export const ClientSocialHub: React.FC<ClientSocialHubProps> = ({
   }, [activePostIndex, onVideoActiveChange]);
 
   useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          clients.forEach((c) => {
+            const thumb = getClientPrimaryThumbnail(c);
+            if (thumb) preloadImageUrl(thumb);
+            if (c.logo) preloadImageUrl(c.logo);
+          });
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (transitionTimerRef.current !== null) {
         window.clearTimeout(transitionTimerRef.current);
@@ -311,9 +342,15 @@ export const ClientSocialHub: React.FC<ClientSocialHubProps> = ({
       window.clearTimeout(transitionTimerRef.current);
     }
 
+    if (nextClient) {
+      prefetchClientResources(nextClient);
+    }
+
     handleImmediateClosePreview();
     setActivePostIndex(null);
     setIsTransitioning(true);
+
+    const delayMs = getIsMobileViewport() ? 90 : 180;
 
     transitionTimerRef.current = window.setTimeout(() => {
       transitionTimerRef.current = null;
@@ -326,14 +363,14 @@ export const ClientSocialHub: React.FC<ClientSocialHubProps> = ({
           window.scrollTo({ top: Math.max(0, top - 32), behavior: 'smooth' });
         }
       }
-    }, 180);
+    }, delayMs);
   };
 
   return (
     <section
       ref={sectionRef}
       id="trabajo-clientes"
-      className={`py-24 md:py-36 transition-colors duration-500 ${
+      className={`py-14 md:py-36 transition-colors duration-500 ${
         selectedClient
           ? 'px-4 sm:px-8 md:px-20 bg-black text-white'
           : 'px-4 sm:px-8 md:px-20 bg-white dark:bg-black text-black dark:text-white'
@@ -351,7 +388,7 @@ export const ClientSocialHub: React.FC<ClientSocialHubProps> = ({
           /* PANTALLA PRINCIPAL — SELECTOR DE PERFILES DE CLIENTES */
           <div>
             <Reveal>
-              <header className="mb-12 sm:mb-16 md:mb-20 max-w-2xl">
+              <header className="mb-8 sm:mb-12 md:mb-20 max-w-2xl">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter uppercase leading-none text-balance">
                   TRABAJO PARA CLIENTES
                 </h2>

@@ -1,5 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
+import Reveal from './Reveal';
+import { useIsMobile } from '../utils/mobile';
 
 const panels = [
   {
@@ -20,6 +22,7 @@ const panels = [
 ];
 
 const Modos: React.FC = () => {
+  const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isReducedMotion, setIsReducedMotion] = useState(false);
@@ -30,6 +33,13 @@ const Modos: React.FC = () => {
     
     const handleChange = () => setIsReducedMotion(mediaQuery.matches);
     mediaQuery.addEventListener('change', handleChange);
+
+    // En móvil no instalamos el listener por pixel de scroll horizontal (fluidez táctil nativa)
+    if (isMobile) {
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }
     
     const handleScroll = () => {
       if (!containerRef.current || mediaQuery.matches) return;
@@ -47,7 +57,58 @@ const Modos: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
       mediaQuery.removeEventListener('change', handleChange);
     };
-  }, []);
+  }, [isMobile]);
+
+  // Experiencia vertical editorial exclusiva para móvil (sin bloqueos 400vh ni re-renders por píxel)
+  if (isMobile) {
+    return (
+      <section
+        id="modos"
+        className="py-16 px-5 bg-white dark:bg-black text-black dark:text-white transition-colors duration-500"
+      >
+        <div className="max-w-xl mx-auto">
+          <Reveal>
+            <p className="text-[10px] font-mono tracking-[0.45em] uppercase opacity-45 mb-8">
+              Modos de producción
+            </p>
+          </Reveal>
+
+          <div className="divide-y divide-black/10 dark:divide-white/10">
+            {panels.map((p, i) => (
+              <Reveal key={p.num} delay={i * 40} className="py-8">
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-xs font-mono tracking-[0.28em] text-red-600 font-bold tabular-nums">
+                    {p.num}
+                  </span>
+                  <div className="h-[1px] flex-1 bg-black/10 dark:bg-white/10" aria-hidden="true" />
+                </div>
+
+                <h3
+                  className="mt-3 font-black tracking-tighter uppercase leading-[0.95] text-balance"
+                  style={{ fontSize: 'clamp(2rem, 10vw, 3.25rem)' }}
+                >
+                  {p.title}
+                </h3>
+
+                <p className="mt-3 text-sm font-light uppercase tracking-[0.14em] text-red-600/90 leading-relaxed">
+                  {p.desc}
+                </p>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal delay={60} className="pt-10 text-center">
+            <h3
+              className="font-black uppercase leading-tight tracking-tighter text-balance"
+              style={{ fontSize: 'clamp(1.35rem, 6.2vw, 2rem)' }}
+            >
+              ESCOGE EL MÁS ADECUADO PARA TU PRESUPUESTO.
+            </h3>
+          </Reveal>
+        </div>
+      </section>
+    );
+  }
 
   if (isReducedMotion) {
     return (

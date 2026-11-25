@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import VimeoPlayer from './VimeoPlayer';
 import TikTokPlayer from './TikTokPlayer';
 import { ClientSocialProfile } from '../data/clientWork';
+import { useIsMobile } from '../utils/mobile';
 
 export interface SocialVideoModalProps {
   client: ClientSocialProfile;
@@ -18,6 +19,7 @@ export const SocialVideoModal: React.FC<SocialVideoModalProps> = ({
   onClose,
 }) => {
   const scrollPositionRef = useRef<number>(0);
+  const isMobile = useIsMobile();
 
   const total = client.posts.length;
   const safeIndex = Math.max(0, Math.min(activeIndex, total - 1));
@@ -83,6 +85,14 @@ export const SocialVideoModal: React.FC<SocialVideoModalProps> = ({
         height: '100dvh',
         zIndex: 99999,
         background: 'rgba(0,0,0,0.96)',
+        ...(isMobile
+          ? {
+              paddingTop: 'max(3.5rem, calc(env(safe-area-inset-top, 0px) + 2.75rem))',
+              paddingBottom: 'max(1.25rem, env(safe-area-inset-bottom, 0px))',
+              paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+              paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+            }
+          : {}),
       }}
       className="flex flex-col items-center justify-center px-4 py-14 sm:py-10 select-none overflow-hidden"
       role="dialog"
@@ -93,7 +103,15 @@ export const SocialVideoModal: React.FC<SocialVideoModalProps> = ({
       <button
         type="button"
         onClick={onClose}
-        className="fixed top-3 sm:top-6 right-3 sm:right-6 z-[100000] min-w-[44px] min-h-[44px] flex items-center justify-center text-white/75 hover:text-white transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/60 hover:rotate-90 cursor-pointer"
+        style={
+          isMobile
+            ? {
+                top: 'max(10px, env(safe-area-inset-top, 0px))',
+                right: 'max(10px, env(safe-area-inset-right, 0px))',
+              }
+            : undefined
+        }
+        className="fixed top-3 sm:top-6 right-3 sm:right-6 z-[100000] min-w-[48px] min-h-[48px] md:min-w-[44px] md:min-h-[44px] flex items-center justify-center text-white/85 md:text-white/75 hover:text-white transition-all duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/60 md:hover:rotate-90 cursor-pointer"
         aria-label="Cerrar reproductor"
         title="Cerrar (Esc)"
       >
@@ -145,11 +163,17 @@ export const SocialVideoModal: React.FC<SocialVideoModalProps> = ({
           style={
             currentPost.aspectRatio === '16:9'
               ? {
-                  width: 'min(92vw, 1040px, calc(76dvh * 16 / 9))',
-                  maxHeight: '76dvh',
+                  width: isMobile
+                    ? 'min(94vw, calc(68dvh * 16 / 9))'
+                    : 'min(92vw, 1040px, calc(76dvh * 16 / 9))',
+                  maxHeight: isMobile ? '68dvh' : '76dvh',
                 }
               : {
-                  height: 'min(76dvh, 720px)',
+                  height: isMobile
+                    ? hasMultiple
+                      ? 'min(64dvh, 620px)'
+                      : 'min(72dvh, 680px)'
+                    : 'min(76dvh, 720px)',
                   maxWidth: 'min(92vw, 420px)',
                   width: 'auto',
                 }

@@ -1,18 +1,40 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { preloadImageUrl, warmPreconnect } from '../utils/mobile';
 
 interface CinematicBannerProps {
   onOpenVideo: (url: string) => void;
 }
 
 const CinematicBanner: React.FC<CinematicBannerProps> = ({ onOpenVideo }) => {
+  const sectionRef = useRef<HTMLElement>(null);
   const videoUrl = 'https://player.vimeo.com/video/1230682471';
   const posterImage =
     'https://i.vimeocdn.com/video/2205637822-418eebe83d879cf6114a6262472e36352cf1d757c3b57f3508bc5959b27fca7d-d_1920';
 
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          preloadImageUrl(posterImage);
+          warmPreconnect('https://player.vimeo.com');
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '600px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [posterImage]);
+
   return (
     <section
+      ref={sectionRef}
       id="cinematic-banner"
-      className="relative w-full my-16 sm:my-24 md:my-32 overflow-hidden bg-black select-none"
+      className="relative w-full my-10 sm:my-16 md:my-32 overflow-hidden bg-black select-none"
       aria-label="Manifiesta — Cortometraje"
     >
       {/* 
@@ -29,7 +51,10 @@ const CinematicBanner: React.FC<CinematicBannerProps> = ({ onOpenVideo }) => {
         <img
           src={posterImage}
           alt="Manifiesta"
-          className="w-full h-full object-contain md:object-cover object-center transform scale-100 group-hover:scale-[1.02] transition-transform duration-1000 ease-out will-change-transform filter brightness-[0.92] contrast-[1.08] group-hover:brightness-[1.02] group-hover:contrast-[1.14]"
+          width={1920}
+          height={1080}
+          decoding="async"
+          className="w-full h-full object-contain md:object-cover object-center transform scale-100 md:group-hover:scale-[1.02] transition-transform duration-1000 ease-out will-change-transform filter brightness-[0.92] contrast-[1.08] md:group-hover:brightness-[1.02] md:group-hover:contrast-[1.14]"
           referrerPolicy="no-referrer"
         />
 
@@ -102,9 +127,22 @@ const CinematicBanner: React.FC<CinematicBannerProps> = ({ onOpenVideo }) => {
             CORTOMETRAJE ORIGINAL
           </p>
           
-          <h2 className="font-cinematic text-2xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-normal tracking-[0.16em] sm:tracking-[0.28em] text-white uppercase leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] transform group-hover:translate-x-1 transition-transform duration-500">
+          <h2 className="font-cinematic text-2xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-normal tracking-[0.16em] sm:tracking-[0.28em] text-white uppercase leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)] transform md:group-hover:translate-x-1 transition-transform duration-500">
             MANIFIESTA
           </h2>
+        </div>
+
+        {/* Botón táctil discreto solo en móvil para indicar reproducción directa */}
+        <div className="absolute inset-0 z-20 pointer-events-none flex md:hidden items-center justify-center">
+          <div className="w-12 h-12 rounded-full border border-white/35 bg-black/55 flex items-center justify-center shadow-lg">
+            <svg
+              className="w-4 h-4 text-white translate-x-0.5 fill-current"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
         </div>
 
         {/* Botón sutil interactivo en la zona inferior derecha */}

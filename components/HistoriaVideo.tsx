@@ -1,8 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Player from '@vimeo/player';
+import { useIsMobile } from '../utils/mobile';
 
-// Vimeo video ID
+// Vimeo video ID & official cached poster frame
 const VIMEO_ID = 1227803563;
+const VIMEO_POSTER_URL =
+  'https://i.vimeocdn.com/video/2202112574-b137d3ff718037444a71e317a9a4bca8df666ab6986b2d157c8041bd49764b88-d_1280?region=us';
 const HOLD_DURATION_MS = 5000;
 
 // Circumference for r=14 SVG circle: 2 * PI * 14 ~= 87.96
@@ -14,6 +17,7 @@ interface HistoriaVideoProps {
 }
 
 const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) => {
+  const isMobile = useIsMobile();
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
@@ -21,7 +25,7 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
   // Video ready status
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
-  // 5-second lock states
+  // 5-second lock states (desktop only)
   const [isHolding, setIsHolding] = useState(false);
   const [canContinue, setCanContinue] = useState(true);
   const [holdProgress, setHoldProgress] = useState(0); // 0 -> 1 over 5s
@@ -34,7 +38,7 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
   const holdRafIdRef = useRef<number | null>(null);
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize Vimeo Player with preloading while still on hero
+  // Initialize Vimeo Player (preloaded proactively while approaching on mobile, immediately on desktop)
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -80,8 +84,9 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
     }
   }, []);
 
-  // Trigger the 5-second retention sequence
+  // Trigger the 5-second retention sequence (DESKTOP ONLY — mobile never locks scroll)
   const startHoldSequence = useCallback(() => {
+    if (isMobile) return;
     // Prevent duplicate triggers
     if (isHoldingRef.current || hasEverTriggeredRef.current) return;
     
@@ -138,21 +143,31 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
         setHoldProgress(1);
       }
     }, HOLD_DURATION_MS);
-  }, []);
+  }, [isMobile]);
 
-  // Prevent downward scrolling during the 5s retention period while keeping position rock-solid
+  // Prevent downward scrolling during the 5s retention period (DESKTOP ONLY)
   useEffect(() => {
+    if (isMobile) {
+      // Ensure mobile is always unlocked and native touch scrolling is never intercepted
+      isHoldingRef.current = false;
+      canContinueRef.current = true;
+      lockedScrollYRef.current = null;
+      setIsHolding(false);
+      setCanContinue(true);
+      setHoldProgress(1);
+      return;
+    }
+
     // Block downward wheel
     const handleWheel = (e: WheelEvent) => {
       if (isHoldingRef.current && !canContinueRef.current) {
-        // Only block downward scroll (deltaY > 0)
         if (e.deltaY > 0) {
           e.preventDefault();
         }
       }
     };
 
-    // Block downward touch drag
+    // Block downward touch drag (only on non-mobile viewports with touch support)
     let touchStartY = 0;
     const handleTouchStart = (e: TouchEvent) => {
       touchStartY = e.touches[0].clientY;
@@ -162,7 +177,6 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
       if (isHoldingRef.current && !canContinueRef.current) {
         const touchCurrentY = e.touches[0].clientY;
         const deltaY = touchStartY - touchCurrentY;
-        // Swiping up on screen means scrolling DOWN
         if (deltaY > 0) {
           e.preventDefault();
         }
@@ -209,18 +223,11 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
       if (holdRafIdRef.current) cancelAnimationFrame(holdRafIdRef.current);
       if (holdTimeoutRef.current) clearTimeout(holdTimeoutRef.current);
     };
-  }, []);
+  }, [isMobile]);
 
   // IntersectionObserver:
-  // - When entering section (45-50% visible):
-  //     1. Notify parent to hide Navbar
-  //     2. Restart video at 0:00
-  //     3. Enable sound & play
-  //     4. Snap/center section to 100dvh
-  //     5. Trigger 5-second cinematic hold
-  // - When leaving (< 20% visible):
-  //     1. Notify parent to restore Navbar
-  //     2. Silence and pause video
+  // - Desktop: exact original 45% enter + unmute + 5s hold sequence.
+  // - Mobile: smooth playback without blocking scroll or hijacking position.
   useEffect(() => {
     const sectionEl = sectionRef.current;
     if (!sectionEl) return;
@@ -233,86 +240,84 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
           const player = playerRef.current;
           if (!player) return;
 
-          // When approximately 45-50% of the video is visible
-          if (entry.intersectionRatio >= 0.45) {
+          const enterRatio = isMobile ? 0.35 : 0.45;
+          const leaveRatio = isMobile ? 0.12 : 0.20;
+
+          if (entry.intersectionRatio >= enterRatio) {
             if (!isSectionActive) {
               isSectionActive = true;
-              onVideoActiveChange?.(true);
+              onVideoActiveChange?.(!isMobile);
 
-              // 1. Restart from 0:00
-              // 2. Unmute and set volume to 1
-              // 3. Play video with sound
-              player.setCurrentTime(0)
-                .catch(() => {})
-                .then(() => player.setMuted(false))
-                .then(() => player.setVolume(1))
-                .then(() => player.play())
-                .catch(() => {
-                  player.play().catch(() => {});
-                });
+              if (isMobile) {
+                // On mobile keep inline muted playback fluid (never fight iOS autoplay policy or block scroll)
+                player.play().catch(() => {});
+              } else {
+                player.setCurrentTime(0)
+                  .catch(() => {})
+                  .then(() => player.setMuted(false))
+                  .then(() => player.setVolume(1))
+                  .then(() => player.play())
+                  .catch(() => {
+                    player.play().catch(() => {});
+                  });
 
-              // 4. Start the 5-second hold & snap position
-              startHoldSequence();
+                startHoldSequence();
+              }
             }
-          } else if (entry.intersectionRatio < 0.20) {
-            // User scrolled away from video (back to Hero or down to Modos)
+          } else if (entry.intersectionRatio < leaveRatio) {
             if (isSectionActive) {
               isSectionActive = false;
               onVideoActiveChange?.(false);
               
-              // Silence immediately
               player.setVolume(0).catch(() => {});
               player.setMuted(true).catch(() => {});
               player.pause().catch(() => {});
 
-              // Reset hold trigger for subsequent real re-entries
               hasEverTriggeredRef.current = false;
             }
           }
         });
       },
       {
-        threshold: [0.0, 0.2, 0.45, 0.65, 0.8, 1.0],
+        threshold: [0.0, 0.12, 0.2, 0.35, 0.45, 0.65, 0.8, 1.0],
       }
     );
 
     observer.observe(sectionEl);
 
-    // Audio policy fallback on first user gesture
+    // Audio policy fallback on first user gesture (desktop only; mobile stays seamless)
     const handleFirstGesture = () => {
-      if (isSectionActive && playerRef.current) {
+      if (!isMobile && isSectionActive && playerRef.current) {
         playerRef.current.setMuted(false).catch(() => {});
         playerRef.current.setVolume(1).catch(() => {});
       }
     };
     window.addEventListener('click', handleFirstGesture, { once: true });
-    window.addEventListener('touchstart', handleFirstGesture, { once: true });
+    window.addEventListener('touchstart', handleFirstGesture, { once: true, passive: true });
 
     return () => {
       observer.disconnect();
       window.removeEventListener('click', handleFirstGesture);
       window.removeEventListener('touchstart', handleFirstGesture);
     };
-  }, [startHoldSequence, onVideoActiveChange]);
+  }, [startHoldSequence, onVideoActiveChange, isMobile]);
 
   // SVG stroke calculation for circular progress ring
-  const strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - holdProgress);
+  const strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - (isMobile ? 1 : holdProgress));
 
   return (
     <section 
       ref={sectionRef}
       id="historia"
-      className="relative w-full h-[100dvh] min-h-[100dvh] bg-black overflow-hidden z-10 select-none flex flex-col items-center justify-center !scroll-mt-0"
+      className="relative w-full md:h-[100dvh] min-h-[76dvh] md:min-h-[100dvh] bg-black overflow-hidden z-10 select-none flex flex-col items-center justify-center !scroll-mt-0"
     >
       {/* Anchor for nav compatibility */}
       <span id="origen" className="absolute top-0 opacity-0 pointer-events-none" />
 
       {/* 
-        CENTRAL CINEMATIC VIEWPORT (100dvh):
-        - Video is centered both vertically and horizontally in the viewport.
-        - Absolute protagonist of the screen.
-        - Desktop: Full bleed 100dvh cinematic coverage.
-        - Mobile: Full 16:9 frame visible with zero cut-off / zero zoom, centered in 100dvh stage.
+        CENTRAL CINEMATIC VIEWPORT:
+        - Desktop: Full bleed 100dvh cinematic coverage (unchanged).
+        - Mobile: Full 16:9 frame visible with zero cut-off / object-fit contain and zero scroll lock.
       */}
       <div className="video-stage relative w-full h-full flex items-center justify-center overflow-hidden bg-black">
         
@@ -322,27 +327,35 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
           className="vimeo-native-wrapper pointer-events-none"
         />
 
-        {/* Cinematic black mask during initial preload frame */}
+        {/* Instant poster frame on mobile / cinematic black mask on desktop while Vimeo buffers */}
         <div 
-          className={`absolute inset-0 bg-black pointer-events-none transition-opacity duration-700 ease-in-out z-10 ${
+          className={`absolute inset-0 bg-black pointer-events-none transition-opacity duration-500 md:duration-700 ease-in-out z-10 flex items-center justify-center ${
             isVideoLoaded ? 'opacity-0' : 'opacity-100'
           }`}
-        />
+        >
+          <img
+            src={VIMEO_POSTER_URL}
+            alt="Presentación Cineprood"
+            width={1280}
+            height={720}
+            decoding="async"
+            referrerPolicy="no-referrer"
+            className="md:hidden w-full aspect-video object-contain"
+          />
+        </div>
 
         {/* 
           MINIMALIST CINEMATIC BOTTOM INDICATOR:
-          - Desktop: bottom-22 lg:bottom-24
-          - Mobile: bottom-10 (comfortably in black lower bar)
-          - Circular progress indicator filling over 0s -> 5s (stroke-dashoffset)
-          - Subtle down arrow inside
-          - Discreet text: "Seguir hacia abajo"
-          - Micro-bounce & opacity pulse when 5s finishes, inviting the user to continue
+          - Desktop: bottom-22 lg:bottom-24 with 5s circular hold ring.
+          - Mobile: always clickable (44px+ touch area), zero lock.
         */}
-        <div 
-          onClick={canContinue ? handleScrollToNext : undefined}
-          className={`absolute bottom-10 sm:bottom-16 md:bottom-22 lg:bottom-24 inset-x-0 mx-auto w-fit flex flex-col items-center justify-center gap-2.5 z-20 transition-all duration-700 select-none ${
-            canContinue ? 'cursor-pointer group opacity-90 hover:opacity-100' : 'cursor-default opacity-60'
+        <button 
+          type="button"
+          onClick={canContinue || isMobile ? handleScrollToNext : undefined}
+          className={`absolute bottom-5 sm:bottom-16 md:bottom-22 lg:bottom-24 inset-x-0 mx-auto w-fit min-h-[44px] px-4 flex flex-col items-center justify-center gap-2 z-20 transition-all duration-500 md:duration-700 select-none ${
+            canContinue || isMobile ? 'cursor-pointer group opacity-90 hover:opacity-100' : 'cursor-default opacity-60'
           }`}
+          aria-label="Seguir hacia abajo"
         >
           {/* Circular Progress Ring with Down Arrow */}
           <div className="relative w-9 h-9 flex items-center justify-center">
@@ -377,7 +390,7 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
             {/* Down Arrow inside circle */}
             <svg 
               className={`absolute w-3.5 h-3.5 text-white transition-transform duration-500 ease-out ${
-                canContinue ? 'animate-bounce-subtle group-hover:translate-y-0.5' : 'opacity-70'
+                canContinue || isMobile ? 'animate-bounce-subtle group-hover:translate-y-0.5' : 'opacity-70'
               }`}
               fill="none" 
               viewBox="0 0 24 24" 
@@ -390,14 +403,14 @@ const HistoriaVideo: React.FC<HistoriaVideoProps> = ({ onVideoActiveChange }) =>
           {/* Discreet Text with breathing room */}
           <span 
             className={`text-[10px] sm:text-[11px] font-mono tracking-[0.25em] uppercase transition-all duration-500 ${
-              canContinue 
+              canContinue || isMobile
                 ? 'text-white/90 group-hover:text-white font-medium drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]' 
                 : 'text-white/40'
             }`}
           >
             Seguir hacia abajo
           </span>
-        </div>
+        </button>
       </div>
     </section>
   );

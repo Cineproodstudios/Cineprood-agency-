@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getIsMobileViewport } from '../utils/mobile';
 
 export interface VimeoPlayerProps {
   videoId: string;
@@ -37,9 +38,10 @@ export const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
     videoId
   )}?background=1&autoplay=1&muted=1&loop=1&autopause=0${hashParam}`;
 
+  const mobileInlineParam = getIsMobileViewport() ? '&playsinline=1' : '';
   const modalSrc = `https://player.vimeo.com/video/${encodeURIComponent(
     videoId
-  )}?autoplay=1&title=0&byline=0&portrait=0${hashParam}`;
+  )}?autoplay=1&title=0&byline=0&portrait=0${mobileInlineParam}${hashParam}`;
 
   useEffect(() => {
     setIsLoaded(false);

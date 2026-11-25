@@ -54,13 +54,13 @@ const App: React.FC = () => {
         <Proyectos onOpenVideo={setSelectedVideo} />
         
         {/* Transition Message */}
-        <section className="py-32 md:py-48 bg-white dark:bg-black transition-colors duration-500">
-          <div className="max-w-7xl mx-auto px-8 md:px-24 text-center">
+        <section className="py-16 md:py-48 bg-white dark:bg-black transition-colors duration-500">
+          <div className="max-w-7xl mx-auto px-5 md:px-24 text-center">
             <Reveal>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter uppercase leading-none">
                 También <span className="italic font-light opacity-40">capturamos</span>
               </h2>
-              <div className="mt-8 flex justify-center">
+              <div className="mt-6 md:mt-8 flex justify-center">
                 <div className="w-12 h-[1px] bg-black dark:bg-white opacity-20"></div>
               </div>
             </Reveal>

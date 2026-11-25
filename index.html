@@ -3,7 +3,7 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>CINEPROOD | Tradicional • IA • Híbrido</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -16,6 +16,8 @@
     <link rel="preconnect" href="https://player.vimeo.com">
     <link rel="preconnect" href="https://i.vimeocdn.com">
     <link rel="preconnect" href="https://f.vimeocdn.com">
+    <link rel="preconnect" href="https://i.postimg.cc">
+    <link rel="preconnect" href="https://www.tiktok.com">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@400;700;900&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
         .font-cinematic {
@@ -220,8 +222,69 @@
         }
 
         @media (max-width: 768px) {
+            html,
+            body {
+                max-width: 100vw;
+                overflow-x: clip;
+                -webkit-overflow-scrolling: touch;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            section {
+                scroll-margin-top: calc(60px + env(safe-area-inset-top, 0px));
+                max-width: 100%;
+                overflow-x: clip;
+            }
+
+            /* Faster, crisp mobile reveal so content never lags behind fast touch scroll */
+            .reveal-hidden {
+                transform: translateY(14px);
+                transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            /* Lighter backdrop blur on mobile GPUs for 60fps continuous scroll */
+            nav {
+                backdrop-filter: blur(10px) saturate(130%) !important;
+                -webkit-backdrop-filter: blur(10px) saturate(130%) !important;
+            }
+
+            .mobile-nav-bar {
+                padding-top: max(0.75rem, env(safe-area-inset-top, 0px)) !important;
+                padding-bottom: 0.75rem !important;
+                padding-left: env(safe-area-inset-left, 0px);
+                padding-right: env(safe-area-inset-right, 0px);
+            }
+
+            .mobile-hero {
+                min-height: 100dvh !important;
+                height: auto !important;
+                padding-top: calc(5.5rem + env(safe-area-inset-top, 0px)) !important;
+                padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px)) !important;
+                width: 100%;
+                max-width: 100vw;
+                overflow-x: clip;
+            }
+
+            .mobile-hero-title {
+                font-size: clamp(2.15rem, 11.2vw, 3.85rem) !important;
+                letter-spacing: -0.03em !important;
+            }
+
+            .mobile-hero-cta {
+                backdrop-filter: blur(8px) !important;
+                -webkit-backdrop-filter: blur(8px) !important;
+                min-height: 48px;
+                padding: 0.875rem 1.35rem !important;
+                letter-spacing: 0.24em !important;
+                width: 100%;
+                max-width: 280px;
+            }
+
             .video-stage {
-                height: 100dvh;
+                min-height: 76dvh;
+                height: auto;
+                padding-top: 2rem;
+                padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -267,6 +330,22 @@
                 width: 100% !important;
                 height: 100% !important;
                 object-fit: contain !important;
+            }
+
+            /* Mobile safe horizontal scroll strip for Fotos */
+            .mobile-scroll-strip {
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .mobile-scroll-strip::-webkit-scrollbar {
+                display: none;
+            }
+
+            /* Ensure third-party social embeds never overflow 320px viewports */
+            .mobile-embed-box iframe,
+            .mobile-embed-box blockquote {
+                max-width: 100% !important;
+                min-width: 0 !important;
             }
         }
 
